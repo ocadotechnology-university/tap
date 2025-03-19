@@ -7,7 +7,6 @@
  */
 
 import { createBackend } from '@backstage/backend-defaults';
-import teamAssessmentBackendPlugin from '@internal/plugin-team-assessment-backend';
 
 const backend = createBackend();
 

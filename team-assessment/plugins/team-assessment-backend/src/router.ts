@@ -46,5 +46,13 @@ export async function createRouter({
     res.json(await teamAssessmentListService.getAssessments());
   });
 
+  router.get('/getSampleText', async (req, res) => {
+    res.json(
+      await teamAssessmentListService.getSampleText({
+        credentials: await httpAuth.credentials(req, { allow: ['user'] }),
+      }),
+    );
+  });
+
   return router;
 }
