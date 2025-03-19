@@ -6,6 +6,7 @@ import LibraryBooks from '@material-ui/icons/LibraryBooks';
 import CreateComponentIcon from '@material-ui/icons/AddCircleOutline';
 import LogoFull from './LogoFull';
 import LogoIcon from './LogoIcon';
+
 import {
   Settings as SidebarSettings,
   UserSettingsSignInAvatar,
@@ -27,6 +28,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import { MyGroupsSidebarItem } from '@backstage/plugin-org';
 import GroupIcon from '@material-ui/icons/People';
+import EqualizerIcon from '@material-ui/icons/Equalizer';
 
 const useSidebarLogoStyles = makeStyles({
   root: {
@@ -74,6 +76,7 @@ export const Root = ({ children }: PropsWithChildren<{}>) => (
         />
         <SidebarItem icon={ExtensionIcon} to="api-docs" text="APIs" />
         <SidebarItem icon={LibraryBooks} to="docs" text="Docs" />
+        <SidebarItem icon={EqualizerIcon} to="catalog" text="Test-catalog" />
         <SidebarItem icon={CreateComponentIcon} to="create" text="Create..." />
         {/* End global nav */}
         <SidebarDivider />
