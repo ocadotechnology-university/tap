@@ -37,8 +37,11 @@ import { CatalogGraphPage } from '@backstage/plugin-catalog-graph';
 import { RequirePermission } from '@backstage/plugin-permission-react';
 import { catalogEntityCreatePermission } from '@backstage/plugin-catalog-common/alpha';
 import { githubAuthApiRef } from '@backstage/core-plugin-api';
+import { HelloUserPage } from '@internal/plugin-hello-user';
+
 const app = createApp({
   apis,
+  // Настраиваем внешние маршруты (externalRoutes) и связываем их с плагинами
   bindRoutes({ bind }) {
     bind(catalogPlugin.externalRoutes, {
       createComponent: scaffolderPlugin.routes.root,
@@ -57,12 +60,21 @@ const app = createApp({
     });
   },
   components: {
-    SignInPage: props => <SignInPage {...props} auto providers={['guest', {
-      id: 'custom-auth-provider',
-      title: 'GitHub',
-      message: 'Sign in using GitHub',
-      apiRef: githubAuthApiRef,
-    }]} />,
+    SignInPage: props => (
+      <SignInPage
+        {...props}
+        auto
+        providers={[
+          'guest',
+          {
+            id: 'custom-auth-provider',
+            title: 'GitHub',
+            message: 'Sign in using GitHub',
+            apiRef: githubAuthApiRef,
+          },
+        ]}
+      />
+    ),
   },
 });
 
@@ -70,17 +82,11 @@ const routes = (
   <FlatRoutes>
     <Route path="/" element={<Navigate to="catalog" />} />
     <Route path="/catalog" element={<CatalogIndexPage />} />
-    <Route
-      path="/catalog/:namespace/:kind/:name"
-      element={<CatalogEntityPage />}
-    >
+    <Route path="/catalog/:namespace/:kind/:name" element={<CatalogEntityPage />}>
       {entityPage}
     </Route>
     <Route path="/docs" element={<TechDocsIndexPage />} />
-    <Route
-      path="/docs/:namespace/:kind/:name/*"
-      element={<TechDocsReaderPage />}
-    >
+    <Route path="/docs/:namespace/:kind/:name/*" element={<TechDocsReaderPage />}>
       <TechDocsAddons>
         <ReportIssue />
       </TechDocsAddons>
@@ -100,6 +106,9 @@ const routes = (
     </Route>
     <Route path="/settings" element={<UserSettingsPage />} />
     <Route path="/catalog-graph" element={<CatalogGraphPage />} />
+
+    {}
+    <Route path="/hello-user" element={<HelloUserPage />} />
   </FlatRoutes>
 );
 
