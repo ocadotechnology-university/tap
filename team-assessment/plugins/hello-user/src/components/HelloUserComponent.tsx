@@ -18,6 +18,7 @@ export const HelloUserComponent = () => {
   return (
     <div style={{ padding: '1rem' }}>
       <h1>Hello, {userName}!</h1>
+      <h1>What a nice day!</h1>
     </div>
   );
 };

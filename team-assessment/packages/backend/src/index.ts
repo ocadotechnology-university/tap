@@ -91,31 +91,12 @@ const customAuthResolver = createBackendModule({
 
               console.log(info);
               const { profile: { email } } = info;
-
-              // Profiles are not always guaranteed to have an email address.
-              // You can also find more provider-specific information in `info.result`.
-              // It typically contains a `fullProfile` object as well as ID and/or access
-              // tokens that you can use for additional lookups.
               if (!email) {
                 throw new Error('User profile contained no email');
               }
 
-              // You can add your own custom validation logic here.
-              // Logins can be prevented by throwing an error like the one above.
-
-              // This example resolver simply uses the local part of the email as the name.
               const [user] = email.split('@');
 
-              // This helper function handles sign-in by looking up a user in the catalog.
-              // The lookup can be done either by reference, annotations, or custom filters.
-              //
-              // The helper also issues a token for the user, using the standard group
-              // membership logic to determine the ownership references of the user.
-              //
-              // There are a number of other methods on the ctx, feel free to explore them!
-
-
-              // By using `stringifyEntityRef` we ensure that the reference is formatted correctly
               const userEntity = stringifyEntityRef({
                 kind: 'User',
                 name: user,
@@ -138,5 +119,7 @@ const customAuthResolver = createBackendModule({
 
 backend.add(customAuthResolver)
 
+
+// backend.add(import('@internal/plugin-hello-user-backend'));
 
 backend.start();
