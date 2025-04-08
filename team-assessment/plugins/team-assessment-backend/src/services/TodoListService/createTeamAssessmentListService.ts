@@ -3,6 +3,8 @@ import { NotFoundError } from '@backstage/errors';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
 // import crypto from 'node:crypto';
 import { Assessment, TeamAssessmentListService } from './types';
+import prisma from '../../prismaClient'
+import { json } from 'express';
 
 // TEMPLATE NOTE:
 // This is a simple in-memory todo list store. It is recommended to use a
@@ -20,70 +22,31 @@ export async function createAssessmentListService({
 }): Promise<TeamAssessmentListService> {
   logger.info('Initializing AssessmentListService');
 
-  const storedAssessments = new Array<Assessment>();
+  // const storedAssessments = new Array<Assessment>();
 
   return {
-    async createAssessment(input, options) {
-      let title = input.title;
-
-      // TEMPLATE NOTE:
-      // A common pattern for Backstage plugins is to pass an entity reference
-      // from the frontend to then fetch the entire entity from the catalog in the
-      // backend plugin.
-      if (input.entityRef) {
-        // TEMPLATE NOTE:
-        // Cross-plugin communication uses service-to-service authentication. The
-        // `AuthService` lets you generate a token that is valid for communication
-        // with the target plugin only. You must also provide credentials for the
-        // identity that you are making the request on behalf of.
-        //
-        // If you want to make a request using the plugin backend's own identity,
-        // you can access it via the `auth.getOwnServiceCredentials()` method.
-        // Beware that this bypasses any user permission checks.
-        const { token } = await auth.getPluginRequestToken({
-          onBehalfOf: options.credentials,
-          targetPluginId: 'catalog',
-        });
-        const entity = await catalog.getEntityByRef(input.entityRef, {
-          token,
-        });
-        if (!entity) {
-          throw new NotFoundError(
-            `No entity found for ref '${input.entityRef}'`,
-          );
-        }
-
-        // TEMPLATE NOTE:
-        // Here you could read any form of data from the entity. A common use case
-        // is to read the value of a custom annotation for your plugin. You can
-        // read more about how to add custom annotations here:
-        // https://backstage.io/docs/features/software-catalog/extending-the-model#adding-a-new-annotation
-        //
-        // In this example we just use the entity title to decorate the todo item.
-
-        const entityDisplay = entity.metadata.title ?? input.entityRef;
-        title = `[${entityDisplay}] ${input.title}`;
-      }
-
+    async createAssessment(options) {
       const createdBy = options.credentials.principal.userEntityRef;
-      const newAssessment = {
-        title,
-        createdBy,
-      };
 
-      storedAssessments.push(newAssessment);
+      const newAssessment = prisma.assessment.create({
+        data: {
+          createdBy
+        }
+      })
 
-      // TEMPLATE NOTE:
-      // The second argument of the logger methods can be used to pass
-      // structured metadata. You can read more about the logger service here:
-      // https://backstage.io/docs/backend-system/core-services/logger
-      logger.info('Created new assessment', { title, createdBy });
+      logger.info('Created new assessment by', { createdBy });
 
       return newAssessment;
     },
 
-    async getAssessments() {
-      return { items: Array.from(storedAssessments) };
+    async getAssessments(options) {
+      const user = options.credentials.principal.userEntityRef;
+      const assessments = await prisma.assessment.findMany({
+        where: {
+          createdBy: user
+        }
+      })
+      return assessments;
     },
 
     async getSampleText(options) {

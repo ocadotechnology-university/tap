@@ -189,10 +189,6 @@ const serviceEntityPage = (
     <EntityLayout.Route path="/docs" title="Docs">
       {techdocsContent}
     </EntityLayout.Route>
-
-    <EntityLayout.Route path="/team-assessment" title="Team Assessment">
-      <TeamAssessmentPage />
-    </EntityLayout.Route>
   </EntityLayout>
 );
 
@@ -227,6 +223,9 @@ const websiteEntityPage = (
 
     <EntityLayout.Route path="/docs" title="Docs">
       {techdocsContent}
+    </EntityLayout.Route>
+    <EntityLayout.Route path="/team-assessment" title="Team Assessment">
+      <TeamAssessmentPage />
     </EntityLayout.Route>
   </EntityLayout>
 );

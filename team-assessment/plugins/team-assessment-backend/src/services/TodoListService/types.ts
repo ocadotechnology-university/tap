@@ -4,22 +4,25 @@ import {
 } from '@backstage/backend-plugin-api';
 
 export interface Assessment {
-  title: string;
+  id: number;
   createdBy: string;
+  createdAt: Date;
 }
 
 export interface TeamAssessmentListService {
   createAssessment(
-    input: {
-      title: string;
-      entityRef?: string;
-    },
+    // input: {
+    //   entityRef?: string;
+    // },
     options: {
       credentials: BackstageCredentials<BackstageUserPrincipal>;
     },
   ): Promise<Assessment>;
 
-  getAssessments(): Promise<{ items: Assessment[] }>;
+  getAssessments(options: {
+    credentials: BackstageCredentials<BackstageUserPrincipal>;
+  }): Promise<Assessment[]>;
+  
   getSampleText(options: {
     credentials: BackstageCredentials<BackstageUserPrincipal>;
   }): Promise<{ message: string }>;

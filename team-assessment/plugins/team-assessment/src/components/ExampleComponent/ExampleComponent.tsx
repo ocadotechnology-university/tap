@@ -8,6 +8,8 @@ import {
   SupportButton,
 } from '@backstage/core-components';
 import { TeamAssessmentSampleCard } from '../TeamAssessmentSampleCard';
+import { ButtonComponent } from '../ButtonComponent'
+import { AssessmentList } from '../AssessmentList';
 
 export const ExampleComponent = () => (
   <Page themeId="tool">
@@ -19,6 +21,12 @@ export const ExampleComponent = () => (
       <Grid container spacing={3} direction="column">
         <Grid item>
           <TeamAssessmentSampleCard />
+        </Grid>
+        <Grid item>
+          <ButtonComponent />
+        </Grid>
+        <Grid item>
+          <AssessmentList />
         </Grid>
       </Grid>
     </Content>
