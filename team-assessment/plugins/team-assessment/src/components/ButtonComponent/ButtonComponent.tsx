@@ -23,8 +23,6 @@ export const ButtonComponent = () => {
             'Content-Type': 'application/json',
             Accept: 'application/json',
           },
-          // Если нужно отправлять данные, добавьте тело запроса:
-          // body: JSON.stringify({ key: 'value' }),
         }
       );
 

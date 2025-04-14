@@ -1,12 +1,11 @@
 import React from 'react';
-import { Grid, makeStyles } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
 import {
   Header,
   Page,
   Content,
 } from '@backstage/core-components';
 import { TeamAssessmentSampleCard } from '../TeamAssessmentSampleCard';
-import { ButtonComponent } from '../ButtonComponent';
 
 const useStyles = makeStyles({
   content: {
@@ -29,7 +28,6 @@ export const ExampleComponent = () => {
     <Header title="Team Assessment Plugin"></Header>
     <Content className={classes.content}>
       <TeamAssessmentSampleCard />
-      <ButtonComponent />
     </Content>
   </Page>
   )

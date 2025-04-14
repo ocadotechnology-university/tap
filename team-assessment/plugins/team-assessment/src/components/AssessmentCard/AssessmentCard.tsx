@@ -1,7 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Card, CardContent, Typography, Avatar } from '@material-ui/core';
-import { ButtonComponent } from '../ButtonComponent';
+import { Card, CardContent, Typography, Button } from '@material-ui/core';
+import { Avatar } from '@backstage/core-components';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -27,14 +27,17 @@ const useStyles = makeStyles(theme => ({
     fontWeight: 600,
     fontSize: '1.2rem',
     textAlign: 'center',
-    marginBottom: theme.spacing(0.5)
   },
   email: {
     color: theme.palette.text.secondary,
     textAlign: 'center',
     fontSize: '0.875rem',
-    wordBreak: 'break-word'
-  },
+    wordBreak: 'break-word',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '2.2rem',
+  },  
   content: {
     padding: theme.spacing(3),
     display: 'flex',
@@ -56,10 +59,6 @@ interface UserCardProps {
 
 export const UserCard = ({ user }: UserCardProps) => {
   const classes = useStyles();
-  
-  const initials = user.displayName 
-    ? user.displayName.split(' ').map(n => n[0]).join('').toUpperCase()
-    : user.name.split(/[-_]/).map(n => n[0]).join('').toUpperCase();
 
   const displayName = user.displayName || 
     user.name.split(/[-_]/).map(n => n.charAt(0).toUpperCase() + n.slice(1)).join(' ');
@@ -67,24 +66,26 @@ export const UserCard = ({ user }: UserCardProps) => {
   return (
     <Card className={classes.root}>
       <CardContent className={classes.content}>
-        <div className={classes.header}>
-          <Avatar 
-            className={classes.avatar}
-            src={user.picture}
-            alt={displayName}
-          >
-            {initials}
-          </Avatar>
-          <Typography variant="h6" className={classes.name}>
-            {displayName}
-          </Typography>
-          {user.email && (
-            <Typography variant="body2" className={classes.email}>
-              {user.email}
+        <Avatar
+            displayName={displayName}
+            picture={user.picture}
+          />
+          <div>
+            <Typography variant="h6" className={classes.name}>
+                {displayName}
             </Typography>
-          )}
-        </div>
-        <ButtonComponent />
+            {user.email && (
+                <Typography variant="body2" className={classes.email}>
+                {user.email}
+                </Typography>
+            )}
+          </div>
+          <Button onClick={() => {
+                alert('clicked');
+            }}
+            variant="contained">
+            Create an assessment
+          </Button>
       </CardContent>
     </Card>
   );

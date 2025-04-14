@@ -12,6 +12,7 @@ const useStyles = makeStyles(theme => ({
   container: {
     display: 'flex',
     flexDirection: 'column',
+    margin: '0',
     background: theme.palette.background.paper,
     padding: '1rem',
     gap: '1rem',
@@ -64,15 +65,17 @@ export const TeamAssessmentSampleCard = () => {
       ) : state.error ? (
         <div>Error: {state.error.message}</div>
       ) : state.value?.length ? (
-        <HorizontalScrollGrid>
-          {state.value.map(user => (
-            <Box key={user.id} sx={{ minWidth: 240, pr: 2 }}>
-              <UserCard user={user} />
-            </Box>
-          ))}
-        </HorizontalScrollGrid>
+        <div style={{ padding: '8px'}}>
+          <HorizontalScrollGrid>
+            {state.value.map(user => (
+              <Box key={user.id} sx={{ minWidth: 240, pr: 2 }}>
+                <UserCard user={user} />
+              </Box>
+            ))}
+          </HorizontalScrollGrid>
+        </div>
       ) : (
-        <div>No members found in this group</div>
+        <div>No members found</div>
       )}
     </div>
   );
