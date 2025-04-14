@@ -1,34 +1,36 @@
 import React from 'react';
-import { Grid } from '@material-ui/core';
+import { Grid, makeStyles } from '@material-ui/core';
 import {
   Header,
   Page,
   Content,
-  ContentHeader,
-  SupportButton,
 } from '@backstage/core-components';
 import { TeamAssessmentSampleCard } from '../TeamAssessmentSampleCard';
-import { ButtonComponent } from '../ButtonComponent'
-import { AssessmentList } from '../AssessmentList';
+import { ButtonComponent } from '../ButtonComponent';
 
-export const ExampleComponent = () => (
+const useStyles = makeStyles({
+  content: {
+    padding: '0px',
+    paddingTop: '1rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem'
+  },
+  grid: {
+    width: '100%', 
+    maxWidth: '100%',
+  },
+});
+
+export const ExampleComponent = () => {
+  const classes = useStyles();
+  return (
   <Page themeId="tool">
     <Header title="Team Assessment Plugin"></Header>
-    <Content>
-      <ContentHeader title="Sample Text Fetching">
-        <SupportButton>A description of your plugin goes here.</SupportButton>
-      </ContentHeader>
-      <Grid container spacing={3} direction="column">
-        <Grid item>
-          <TeamAssessmentSampleCard />
-        </Grid>
-        <Grid item>
-          <ButtonComponent />
-        </Grid>
-        <Grid item>
-          <AssessmentList />
-        </Grid>
-      </Grid>
+    <Content className={classes.content}>
+      <TeamAssessmentSampleCard />
+      <ButtonComponent />
     </Content>
   </Page>
-);
+  )
+};

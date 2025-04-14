@@ -2,18 +2,30 @@ import React from 'react';
 import { InfoCard, Progress } from '@backstage/core-components';
 import { fetchApiRef, useApi } from '@backstage/core-plugin-api';
 import useAsync from 'react-use/esm/useAsync';
-import { Grid, makeStyles } from '@material-ui/core';
-
+import { Grid, makeStyles, Typography } from '@material-ui/core';
+import { AssessmentCard } from '../AssessmentCard';
 
 const useStyles = makeStyles({
   card: {
     minWidth: 200,
-    maxWidth: 300,
+    width: '100%', // Занимаем всю доступную ширину
     height: '100%',
     margin: '8px',
+    display: 'flex',
+    flexDirection: 'column',
   },
   container: {
-    padding: '16px',
+    padding: '12px',
+  },
+  content: {
+    flexGrow: 1, // Растягиваем контент на доступное пространство
+    overflow: 'hidden', // Скрываем переполнение
+    wordBreak: 'break-word', // Переносим длинные слова
+  },
+  dateText: {
+    fontSize: '0.8rem',
+    color: '#666',
+    marginTop: '8px', // Добавляем отступ сверху
   },
 });
 
@@ -47,7 +59,7 @@ export const AssessmentList = () => {
   if (error) {
     return (
       <InfoCard title="Error">
-        <div>{error.message}</div>
+        <Typography variant="body1">{error.message}</Typography>
       </InfoCard>
     );
   }
@@ -55,7 +67,7 @@ export const AssessmentList = () => {
   if (!value || value.length === 0) {
     return (
       <InfoCard title="Assessments">
-        <div>No assessments found</div>
+        <Typography variant="body1">No assessments found</Typography>
       </InfoCard>
     );
   }
@@ -65,19 +77,9 @@ export const AssessmentList = () => {
       <Grid container spacing={2}>
         {value.map((assessment) => (
           <Grid item key={assessment.id} xs={12} sm={6} md={4} lg={3}>
-            <div className={classes.card}>
-              <InfoCard 
-                title={`${assessment.createdBy}`}
-                subheader={`ID: ${assessment.id}`}
-              >
-                <div style={{ fontSize: '0.8rem', color: '#666' }}>
-                  Created: {new Date(assessment.createdAt).toLocaleDateString()}
-                </div>
-              </InfoCard>
-            </div>
+            <AssessmentCard assessment={assessment} />
           </Grid>
         ))}
       </Grid>
-    </div>
-  );
+    </div>);
 };

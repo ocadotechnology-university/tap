@@ -39,3 +39,51 @@ spec:
     message ExampleMessage {
       string example = 1;
     };
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: jdoe
+spec:
+  profile:
+    displayName: Jenny Doe
+    email: jenny-doe@example.com
+    picture: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOaosLOfQeaGLERjXg1AILw9D_gpNj7Pdv_Q&s
+  memberOf: [infrastructure]
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: charle
+spec:
+  profile:
+    displayName: Charle De Gole
+    email: charleroi-doe@example.com
+    picture: https://example.com/staff/jenny-with-party-hat.jpeg
+  memberOf: [infrastructure]
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: alex
+spec:
+  profile:
+    displayName: Alex Bro
+    email: alex@example.com
+    picture: https://example.com/staff/jenny-with-party-hat.jpeg
+  memberOf: [infrastructure]
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: infrastructure
+  description: The infra business unit
+spec:
+  type: business-unit
+  profile:
+    displayName: Infrastructure
+    email: infrastructure@example.com
+    picture: https://example.com/groups/bu-infrastructure.jpeg
+  parent: ops
+  children: [backstage, other]
+  members: [jdoe]

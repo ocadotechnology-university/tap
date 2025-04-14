@@ -333,6 +333,9 @@ const groupPage = (
         </Grid>
       </Grid>
     </EntityLayout.Route>
+    <EntityLayout.Route path="/team-assessment" title="Team Assessment">
+      <TeamAssessmentPage />
+    </EntityLayout.Route>
   </EntityLayout>
 );
 
