@@ -15,7 +15,9 @@ datasource db {
 
 model Assessment {
   id         Int      @id @default(autoincrement())
+  groupId    String
   createdBy  String
+  targetUser String
   createdAt  DateTime @default(now())
   softSkills SoftSkill[]
 }
@@ -25,6 +27,7 @@ model SoftSkill {
   assessmentId Int
   assessment   Assessment @relation(fields: [assessmentId], references: [id])
   area         String
+  competency   String
   level        Level
   comments     String[]
 }

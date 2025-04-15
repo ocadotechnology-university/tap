@@ -6,22 +6,23 @@ import {
 export interface Assessment {
   id: number;
   createdBy: string;
+  targetUser: string;
   createdAt: Date;
 }
 
 export interface TeamAssessmentListService {
-  createAssessment(
-    // input: {
-    //   entityRef?: string;
-    // },
-    options: {
-      credentials: BackstageCredentials<BackstageUserPrincipal>;
-    },
-  ): Promise<Assessment>;
+  // createAssessment(
+  //   // input: {
+  //   //   entityRef?: string;
+  //   // },
+  //   options: {
+  //     credentials: BackstageCredentials<BackstageUserPrincipal>;
+  //   },
+  // ): Promise<Assessment>;
 
   getAssessments(options: {
     credentials: BackstageCredentials<BackstageUserPrincipal>;
-  }): Promise<Assessment[]>;
+  }, teamId: string): Promise<string[]>;
   
   getSampleText(options: {
     credentials: BackstageCredentials<BackstageUserPrincipal>;

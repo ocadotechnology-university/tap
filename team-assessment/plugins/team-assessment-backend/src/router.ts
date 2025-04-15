@@ -22,22 +22,26 @@ export async function createRouter({
   // If you want to define a schema for your API we recommend using Backstage's
   // OpenAPI tooling: https://backstage.io/docs/next/openapi/01-getting-started
 
-  router.post('/createAssessment', async (req, res) => {
+  // router.post('/createAssessment', async (req, res) => {
 
-    const result = await teamAssessmentListService.createAssessment(
-      {
-        credentials: await httpAuth.credentials(req, { allow: ['user'] }),
-      },
-    );
+  //   const result = await teamAssessmentListService.createAssessment(
+  //     {
+  //       credentials: await httpAuth.credentials(req, { allow: ['user'] }),
+  //     },
+  //   );
 
-    res.status(201).json(result);
-  });
+  //   res.status(201).json(result);
+  // });
 
   router.get('/getAssessments', async (req, res) => {
+
+    const { teamId } = req.query;
+
     res.json(
       await teamAssessmentListService.getAssessments({
-        credentials: await httpAuth.credentials(req, { allow: ['user'] }),
-    }));
+        credentials: await httpAuth.credentials(req, { allow: ['user'] })},
+        String(teamId)
+    ));
   });
 
   router.get('/getSampleText', async (req, res) => {
