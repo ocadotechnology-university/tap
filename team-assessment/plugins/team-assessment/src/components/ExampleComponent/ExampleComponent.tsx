@@ -6,6 +6,7 @@ import {
   Content,
 } from '@backstage/core-components';
 import { TeamAssessmentSampleCard } from '../TeamAssessmentSampleCard';
+import { MyAssessmentsComponent } from '../MyAssessmentsComponent';
 
 const useStyles = makeStyles({
   content: {
@@ -28,6 +29,7 @@ export const ExampleComponent = () => {
     <Header title="Team Assessment Plugin"></Header>
     <Content className={classes.content}>
       <TeamAssessmentSampleCard />
+      <MyAssessmentsComponent />
     </Content>
   </Page>
   )

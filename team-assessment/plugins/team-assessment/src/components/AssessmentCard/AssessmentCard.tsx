@@ -1,6 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Card, CardContent, Typography, Button } from '@material-ui/core';
+import { Card, CardContent, Typography, Button, Box } from '@material-ui/core';
 import { Avatar } from '@backstage/core-components';
 
 const useStyles = makeStyles(theme => ({
@@ -44,20 +44,43 @@ const useStyles = makeStyles(theme => ({
     flexDirection: 'column',
     alignItems: 'center',
     gap: '1rem',
+  },
+  buttonGroup: {
+    display: 'flex',
+    gap: '0.5rem',
+    width: '100%',
+  },
+  disabledButton: {
+    backgroundColor: theme.palette.action.disabledBackground,
+    color: theme.palette.text.disabled,
+    '&:hover': {
+      backgroundColor: theme.palette.action.disabledBackground,
+    }
   }
 }));
 
-interface UserCardProps {
+interface AssessmentCardProps {
   user: {
     id: string;
     name: string;
     displayName?: string;
     email?: string;
     picture?: string;
+    hasAssessment?: boolean;
   };
+  variant: 'create' | 'view';
+  onCreateAssessment?: () => void;
+  onReviewAssessment?: () => void;
+  onEditAssessment?: () => void;
 }
 
-export const UserCard = ({ user }: UserCardProps) => {
+export const AssessmentCard = ({ 
+  user, 
+  variant, 
+  onCreateAssessment, 
+  onReviewAssessment, 
+  onEditAssessment 
+}: AssessmentCardProps) => {
   const classes = useStyles();
 
   const displayName = user.displayName || 
@@ -67,25 +90,50 @@ export const UserCard = ({ user }: UserCardProps) => {
     <Card className={classes.root}>
       <CardContent className={classes.content}>
         <Avatar
-            displayName={displayName}
-            picture={user.picture}
-          />
-          <div>
-            <Typography variant="h6" className={classes.name}>
-                {displayName}
+          displayName={displayName}
+          picture={user.picture}
+        />
+        <div>
+          <Typography variant="h6" className={classes.name}>
+            {displayName}
+          </Typography>
+          {user.email && (
+            <Typography variant="body2" className={classes.email}>
+              {user.email}
             </Typography>
-            {user.email && (
-                <Typography variant="body2" className={classes.email}>
-                {user.email}
-                </Typography>
-            )}
-          </div>
-          <Button onClick={() => {
-                alert('clicked');
-            }}
-            variant="contained">
-            Create an assessment
+          )}
+        </div>
+        
+        {variant === 'create' ? (
+          <Button 
+            onClick={onCreateAssessment}
+            variant="contained"
+            color="primary"
+            fullWidth
+            disabled={user.hasAssessment}
+            className={user.hasAssessment ? classes.disabledButton : ''}
+          >
+            {user.hasAssessment ? 'Assessment Created' : 'Create an assessment'}
           </Button>
+        ) : (
+          <Box className={classes.buttonGroup}>
+            <Button 
+              onClick={onReviewAssessment}
+              variant="contained"
+              color="primary"
+              fullWidth
+            >
+              Review
+            </Button>
+            <Button 
+              onClick={onEditAssessment}
+              variant="outlined"
+              fullWidth
+            >
+              Edit
+            </Button>
+          </Box>
+        )}
       </CardContent>
     </Card>
   );

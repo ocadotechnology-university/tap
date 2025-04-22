@@ -22,35 +22,37 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export const TeamAssessmentSampleCard = () => {
+export const MyAssessmentsComponent = () => {
   const classes = useStyles();
   const { loading, error, value } = getTeamAssessments();
 
   return (
     <div className={classes.container}>
       <Typography variant="h6" className={classes.counter}>
-        Team Members ({value?.allUsers.length || 0}):
+        My Assessments ({value?.assessedUsers.length || 0}):
       </Typography>
 
       {loading ? (
         <Progress />
       ) : error ? (
         <div>Error: {error.message}</div>
-      ) : value?.allUsers.length ? (
+      ) : value?.assessedUsers.length ? (
         <div style={{ padding: '8px'}}>
           <HorizontalScrollGrid>
-            {value.allUsers.map(user => (
+            {value.allUsers
+            .filter(user => user.hasAssessment)
+            .map(user => (
               <Box key={user.id} sx={{ minWidth: 240, pr: 2 }}>
                 <AssessmentCard 
                   user={user} 
-                  variant="create" 
+                  variant="view" 
                 />
               </Box>
             ))}
           </HorizontalScrollGrid>
         </div>
       ) : (
-        <div>No members found</div>
+        <div>No assessments found</div>
       )}
     </div>
   );

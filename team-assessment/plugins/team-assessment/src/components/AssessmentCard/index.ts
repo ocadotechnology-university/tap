@@ -1,1 +1,1 @@
-export { UserCard } from './AssessmentCard';
+export { AssessmentCard } from './AssessmentCard';
