@@ -1,16 +1,16 @@
-/*
-  Warnings:
-
-  - Added the required column `groupId` to the `Assessment` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `targetUser` to the `Assessment` table without a default value. This is not possible if the table is not empty.
-
-*/
 -- CreateEnum
 CREATE TYPE "Level" AS ENUM ('BAR', 'EXCELLENT', 'LEADING');
 
--- AlterTable
-ALTER TABLE "Assessment" ADD COLUMN     "groupId" TEXT NOT NULL,
-ADD COLUMN     "targetUser" TEXT NOT NULL;
+-- CreateTable
+CREATE TABLE "Assessment" (
+    "id" SERIAL NOT NULL,
+    "groupId" TEXT NOT NULL,
+    "createdBy" TEXT NOT NULL,
+    "targetUser" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Assessment_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "SoftSkill" (

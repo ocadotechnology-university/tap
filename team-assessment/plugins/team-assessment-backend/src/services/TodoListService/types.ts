@@ -28,3 +28,13 @@ export interface TeamAssessmentListService {
     credentials: BackstageCredentials<BackstageUserPrincipal>;
   }): Promise<{ message: string }>;
 }
+
+export interface Comment {
+  id: string;
+  text: string;
+}
+
+export interface SectionSubmission {
+  section: string;
+  comments: Comment[];
+}
