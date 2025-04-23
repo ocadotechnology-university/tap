@@ -1,0 +1,1 @@
+export { EditingSoftSkillsComponent } from './EditingSoftSkillsComponent';

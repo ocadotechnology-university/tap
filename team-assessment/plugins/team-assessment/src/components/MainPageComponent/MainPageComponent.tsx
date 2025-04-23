@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Grid, makeStyles } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
 import yaml from 'js-yaml';
 import {
   Header,
   Page,
-  Content,
+  Content
 } from '@backstage/core-components';
-import { AssessmentSoftSkillsSection } from '../AssessmentSoftSkillsSection';
 import { TeamAssessmentSampleCard } from '../TeamAssessmentSampleCard';
 import { MyAssessmentsComponent } from '../MyAssessmentsComponent';
+import { EditingAssessmentComponent } from '../EditingAssessmentComponent';
+
 
 const useStyles = makeStyles({
   content: {
@@ -19,16 +20,19 @@ const useStyles = makeStyles({
     gap: '1rem'
   },
   grid: {
-    width: '100%', 
+    width: '100%',
     maxWidth: '100%',
   },
 });
 
-export const ExampleComponent = () => {
+export const MainPageComponent = () => {
   const classes = useStyles();
+  const [isEditingAssessment, setIsEditingAssessment] = useState(false);
   const [configData, setConfigData] = useState<Record<string, { title: string, labels: string[] }[]> | null>(null);
 
-  // yaml from public
+  const startEditing = () => setIsEditingAssessment(true);
+  const stopEditing = () => setIsEditingAssessment(false);
+
   useEffect(() => {
     const fetchConfig = async () => {
       try {
@@ -37,34 +41,30 @@ export const ExampleComponent = () => {
         const data = yaml.load(text) as Record<string, { title: string, labels: string[] }[]>;
         setConfigData(data);
       } catch (error) {
-        console.error("Error while seting configuration:", error);
+        console.error("Error while setting configuration:", error);
       }
     };
 
     fetchConfig();
   }, []);
 
-  if (!configData) {
-    return <div>Loading...</div>;
+  if (isEditingAssessment) {
+    if (!configData) {
+      return <div>Loading...</div>;
+    }
+    return (
+      <EditingAssessmentComponent configData={configData} onBackToMain={stopEditing} />
+    );
   }
+
+
   return (
-  <Page themeId="tool">
-    <Header title="Team Assessment Plugin"></Header>
-    <Content className={classes.content}>
-      <TeamAssessmentSampleCard />
-      <MyAssessmentsComponent />
-      {Object.entries(configData).map(([category, sections]) => (
-          <React.Fragment key={category}>
-            {sections.map(section => (
-              <AssessmentSoftSkillsSection
-                key={section.title}
-                title={section.title}
-                labels={section.labels}
-              />
-            ))}
-          </React.Fragment>
-        ))}
-    </Content>
-  </Page>
-  )
+    <Page themeId="tool">
+      <Header title="Team Assessment Plugin"></Header>
+      <Content className={classes.content}>
+        <TeamAssessmentSampleCard onStartEditing={startEditing} />
+        <MyAssessmentsComponent />
+      </Content>
+    </Page>
+  );
 };

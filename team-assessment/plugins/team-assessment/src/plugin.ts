@@ -28,7 +28,7 @@ export const TeamAssessmentPage = teamAssessmentPlugin.provide(
   createRoutableExtension({
     name: 'TeamAssessmentPage',
     component: () =>
-      import('./components/ExampleComponent').then(m => m.ExampleComponent),
+      import('./components/MainPageComponent').then(m => m.MainPageComponent),
     mountPoint: rootRouteRef,
   }),
 );

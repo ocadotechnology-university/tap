@@ -1,0 +1,1 @@
+export { EditingHardSkillsComponent } from './EditingHardSkillsComponent';

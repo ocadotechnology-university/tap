@@ -37,7 +37,7 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'center',
     alignItems: 'center',
     height: '2.2rem',
-  },  
+  },
   content: {
     padding: theme.spacing(3),
     display: 'flex',
@@ -72,18 +72,20 @@ interface AssessmentCardProps {
   onCreateAssessment?: () => void;
   onReviewAssessment?: () => void;
   onEditAssessment?: () => void;
+  onStartEditing?: () => void;
 }
 
-export const AssessmentCard = ({ 
-  user, 
-  variant, 
-  onCreateAssessment, 
-  onReviewAssessment, 
-  onEditAssessment 
+export const AssessmentCard = ({
+  user,
+  variant,
+  onCreateAssessment,
+  onReviewAssessment,
+  onEditAssessment,
+  onStartEditing,
 }: AssessmentCardProps) => {
   const classes = useStyles();
 
-  const displayName = user.displayName || 
+  const displayName = user.displayName ||
     user.name.split(/[-_]/).map(n => n.charAt(0).toUpperCase() + n.slice(1)).join(' ');
 
   return (
@@ -103,10 +105,13 @@ export const AssessmentCard = ({
             </Typography>
           )}
         </div>
-        
+
         {variant === 'create' ? (
-          <Button 
-            onClick={onCreateAssessment}
+          <Button
+          onClick={() => {
+            onCreateAssessment?.();  // (опційно — якщо хочеш ще щось зробити)
+            onStartEditing?.();      // Вмикає режим редагування
+          }}
             variant="contained"
             color="primary"
             fullWidth
@@ -117,7 +122,7 @@ export const AssessmentCard = ({
           </Button>
         ) : (
           <Box className={classes.buttonGroup}>
-            <Button 
+            <Button
               onClick={onReviewAssessment}
               variant="contained"
               color="primary"
@@ -125,8 +130,11 @@ export const AssessmentCard = ({
             >
               Review
             </Button>
-            <Button 
-              onClick={onEditAssessment}
+            <Button
+              onClick={() => {
+                onEditAssessment?.();
+                onStartEditing?.();
+              }}
               variant="outlined"
               fullWidth
             >

@@ -22,7 +22,11 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export const TeamAssessmentSampleCard = () => {
+export interface TeamAssessmentSampleCardProps {
+  onStartEditing?: () => void;
+}
+
+export const TeamAssessmentSampleCard = ({ onStartEditing }: TeamAssessmentSampleCardProps) => {
   const classes = useStyles();
   const { loading, error, value } = getTeamAssessments();
 
@@ -37,13 +41,14 @@ export const TeamAssessmentSampleCard = () => {
       ) : error ? (
         <div>Error: {error.message}</div>
       ) : value?.allUsers.length ? (
-        <div style={{ padding: '8px'}}>
+        <div style={{ padding: '8px' }}>
           <HorizontalScrollGrid>
             {value.allUsers.map(user => (
               <Box key={user.id} sx={{ minWidth: 240, pr: 2 }}>
-                <AssessmentCard 
-                  user={user} 
-                  variant="create" 
+                <AssessmentCard
+                  user={user}
+                  variant="create"
+                  onStartEditing={onStartEditing}
                 />
               </Box>
             ))}
