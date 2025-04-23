@@ -108,10 +108,10 @@ export const AssessmentCard = ({
 
         {variant === 'create' ? (
           <Button
-          onClick={() => {
-            onCreateAssessment?.();  // (опційно — якщо хочеш ще щось зробити)
-            onStartEditing?.();      // Вмикає режим редагування
-          }}
+            onClick={() => {
+              onCreateAssessment?.();
+              onStartEditing?.();
+            }}
             variant="contained"
             color="primary"
             fullWidth

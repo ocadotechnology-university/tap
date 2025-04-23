@@ -1,13 +1,10 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-
-type Props = {
-  // Додаткові пропси, якщо будуть потрібні
-};
+import HardSkillsTab from '../HardSkillsComponent/HardSkillsTab';
 
 const useStyles = makeStyles({
   content: {
-    padding: '0px',
+    padding: 0,
     paddingTop: '1rem',
     display: 'flex',
     flexDirection: 'column',
@@ -19,13 +16,15 @@ const useStyles = makeStyles({
   },
 });
 
-export const EditingHardSkillsComponent = (props: Props) => {
+export const EditingHardSkillsComponent: React.FC = () => {
   const classes = useStyles();
 
   return (
     <div className={classes.content}>
       <h3>Hard Skills Section</h3>
-      {/* Додатковий контент тут */}
+      <HardSkillsTab />
+
+
     </div>
   );
 };
