@@ -1,10 +1,8 @@
 import { AuthService, LoggerService } from '@backstage/backend-plugin-api';
-import { NotFoundError } from '@backstage/errors';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
 // import crypto from 'node:crypto';
 import { Assessment, TeamAssessmentListService } from './types';
-import prisma from '../../prismaClient'
-import { json } from 'express';
+import prisma from '../../../prismaClient'
 
 // TEMPLATE NOTE:
 // This is a simple in-memory todo list store. It is recommended to use a

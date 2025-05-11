@@ -4,7 +4,7 @@ import {
 } from '@backstage/backend-plugin-api';
 import { createRouter } from './router';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
-import { createAssessmentListService } from './services/TodoListService';
+import { createAssessmentListService } from './services/TodoListService/createAssessmentListService';
 
 /**
  * The team asessment backend plugin

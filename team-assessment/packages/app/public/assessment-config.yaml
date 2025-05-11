@@ -1,23 +1,38 @@
 Soft Skills:
-  - title: Communication(krerfeorf)
+  - title: Communication
+    description: This section assesses communication skills within the team, including both verbal and non-verbal communication.
     labels:
       - Development need
       - Bar
       - Excellent
       - Leading
+
   - title: Teamwork
+    description: This section evaluates collaboration and teamwork abilities, focusing on how well the team works together to achieve goals.
     labels:
       - Development need
       - Bar
       - Excellent
       - Leading
-  - title: Teamwork
+
+  - title: Adaptability
+    description: This section examines how well team members adjust to changes in the workplace and handle unexpected challenges.
     labels:
       - Development need
       - Bar
       - Excellent
       - Leading
-  - title: Teamwork
+
+  - title: Problem Solving
+    description: This section assesses the ability to identify, analyze, and resolve problems effectively in a timely manner.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  - title: Leadership
+    description: This section evaluates leadership qualities, including decision-making, team motivation, and providing guidance to others.
     labels:
       - Development need
       - Bar

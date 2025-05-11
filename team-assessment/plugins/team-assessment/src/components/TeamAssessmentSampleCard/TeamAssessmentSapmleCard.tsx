@@ -29,13 +29,12 @@ export interface TeamAssessmentSampleCardProps {
 export const TeamAssessmentSampleCard = ({ onStartEditing }: TeamAssessmentSampleCardProps) => {
   const classes = useStyles();
   const { loading, error, value } = getTeamAssessments();
-
+  console.log('value:', value); 
   return (
     <div className={classes.container}>
       <Typography variant="h6" className={classes.counter}>
         Team Members ({value?.allUsers.length || 0}):
       </Typography>
-
       {loading ? (
         <Progress />
       ) : error ? (

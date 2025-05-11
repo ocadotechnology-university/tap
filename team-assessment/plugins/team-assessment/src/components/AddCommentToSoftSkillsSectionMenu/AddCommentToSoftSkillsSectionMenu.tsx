@@ -77,7 +77,7 @@ interface Props {
   onClick?: () => void;
 }
 
-export const AddCommentToSectionMenu = ({ label, onClick }: Props) => {
+export const AddCommentToSoftSkillsSectionMenu = ({ label, onClick }: Props) => {
   const classes = useStyles();
   const [comments, setComments] = useState<Comment[]>([]);
 

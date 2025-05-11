@@ -1,0 +1,1 @@
+export { AddCommentToSoftSkillsSectionMenu } from './AddCommentToSoftSkillsSectionMenu';

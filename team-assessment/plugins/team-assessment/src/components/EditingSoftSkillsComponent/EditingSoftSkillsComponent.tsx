@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { AssessmentSoftSkillsSection } from '../AssessmentSoftSkillsSection';
 
 type Props = {
-  configData: Record<string, { title: string, labels: string[] }[]>;
+  configData: Record<string, { title: string, description: string, labels: string[] }[]>;
 };
 
 const useStyles = makeStyles({
@@ -30,6 +30,7 @@ export const EditingSoftSkillsComponent = ({ configData }: Props) => {
           <AssessmentSoftSkillsSection
             key={section.title}
             title={section.title}
+            description={section.description}
             labels={section.labels}
           />
         ))

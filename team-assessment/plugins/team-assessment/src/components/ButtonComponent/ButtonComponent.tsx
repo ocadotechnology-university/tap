@@ -16,13 +16,17 @@ export const ButtonComponent = () => {
     
     try {
       const result = await fetchApi.fetch(
-        'http://localhost:7007/api/team-assessment/createAssessment',
+        'http://localhost:7007/api/team-assessment/createAssessment',  // Заміни на правильний шлях API
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
           },
+          body: JSON.stringify({
+            userId: '123',  // Це значення потрібно замінити на реальний userId
+            teamId: 'team123', // Це значення потрібно замінити на реальний teamId
+          }),
         }
       );
 

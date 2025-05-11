@@ -3,7 +3,7 @@ import { InputError } from '@backstage/errors';
 import { z } from 'zod';
 import express from 'express';
 import Router from 'express-promise-router';
-import { TeamAssessmentListService } from './services/TodoListService/types';
+import { TeamAssessmentListService } from './services/TodoListService/createAssessmentListService/types';
 
 export async function createRouter({
   httpAuth,

@@ -1,1 +1,0 @@
-export { AddCommentToSectionMenu } from './AddCommentToSectionMenu';

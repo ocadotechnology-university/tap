@@ -8,7 +8,7 @@ import {
 } from '@material-ui/core';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import { AddCommentToSectionMenu } from '../AddCommentToSectionMenu';
+import { AddCommentToSoftSkillsSectionMenu } from '../AddCommentToSoftSkillsSectionMenu';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -23,7 +23,13 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     cursor: 'pointer',
     paddingLeft: theme.spacing(2),
-  },  
+  },
+  sectionDescription: {
+    paddingTop: theme.spacing(1),
+    paddingLeft: theme.spacing(2),
+    fontStyle: 'italic',
+    color: theme.palette.text.secondary,
+  },
   sectionListWrapper: {
     overflowX: 'auto',
     paddingTop: theme.spacing(1),
@@ -38,11 +44,13 @@ const useStyles = makeStyles(theme => ({
 
 interface AssessmentSoftSkillsSectionProps {
   title: string;
+  description: string;  // Додаємо пропс для опису
   labels: string[];
 }
 
 export const AssessmentSoftSkillsSection = ({
   title,
+  description,  // Приймаємо пропс для опису
   labels,
 }: AssessmentSoftSkillsSectionProps) => {
   const classes = useStyles();
@@ -60,10 +68,13 @@ export const AssessmentSoftSkillsSection = ({
       </Box>
 
       <Collapse in={open}>
+        <Typography className={classes.sectionDescription}>
+          {description}  {/* Виводимо опис, якщо секція розгорнута */}
+        </Typography>
         <Box className={classes.sectionListWrapper}>
           <Box className={classes.sectionList}>
             {labels.map(label => (
-              <AddCommentToSectionMenu key={label} label={label} />
+              <AddCommentToSoftSkillsSectionMenu key={label} label={label} />
             ))}
           </Box>
         </Box>
