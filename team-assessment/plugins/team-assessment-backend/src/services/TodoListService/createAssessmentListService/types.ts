@@ -11,19 +11,19 @@ export interface Assessment {
 }
 
 export interface TeamAssessmentListService {
-  createAssessment(
-    input: {
-      entityRef?: string;
-    },
-    options: {
-      credentials: BackstageCredentials<BackstageUserPrincipal>;
-    },
-  ): Promise<Assessment>;
+  // createAssessment(
+  //   // input: {
+  //   //   entityRef?: string;
+  //   // },
+  //   options: {
+  //     credentials: BackstageCredentials<BackstageUserPrincipal>;
+  //   },
+  // ): Promise<Assessment>;
 
   getAssessments(options: {
     credentials: BackstageCredentials<BackstageUserPrincipal>;
   }, teamId: string): Promise<string[]>;
-
+  
   getSampleText(options: {
     credentials: BackstageCredentials<BackstageUserPrincipal>;
   }): Promise<{ message: string }>;

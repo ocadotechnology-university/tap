@@ -1,4 +1,5 @@
 import { AuthService, LoggerService } from '@backstage/backend-plugin-api';
+import { NotFoundError } from '@backstage/errors';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
 // import crypto from 'node:crypto';
 import { Assessment, TeamAssessmentListService } from './types';
