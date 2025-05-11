@@ -7,7 +7,7 @@ import { EditingSoftSkillsComponent } from '../EditingSoftSkillsComponent';
 import { EditingHardSkillsComponent } from '../EditingHardSkillsComponent';
 
 type Props = {
-  configData: Record<string, { title: string; labels: string[] }[]>;
+  configData: Record<string, { title: string; description:string, labels: string[] }[]>;
   onBackToMain: () => void;
 };
 

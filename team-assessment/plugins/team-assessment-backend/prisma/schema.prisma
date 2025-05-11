@@ -3,44 +3,60 @@
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Assessment {
-  assessmentId Int      @id @default(autoincrement()) @map("Assessment_ID")
-  createdBy    String   @map("createdBy")
-  targetUser   String   @map("targetUser")
-  date         DateTime @map("Date")
-  groupId      Int?     @map("GroupID")
+  id         Int      @id @default(autoincrement()) @map("Assessment_ID")
+  createdBy  String
+  targetUser String
+  date       DateTime @default(now()) @map("Date")
+  groupId    String   @map("GroupID")
 
-  hardSkills HardSkill[]       @relation("AssessmentToHardSkills")
+  hardSkills HardSkill[]
   softSkills SoftSkillsTable[]
 
   @@map("Assessments")
 }
 
-model HardSkillsMark {
-  markId Int    @id @map("Mark_ID")
-  text   String @map("Text")
+model HardSkillsSection {
+  id   Int    @id @map("Question_ID")
+  text String @map("Text")
 
-  hardSkills HardSkill[] @relation("HardSkillsToHardSkillsMark")
+  hardSkills HardSkill[]
+
+  @@map("HardSkillsSections")
+}
+
+model HardSkillsMark {
+  id   Int    @id @map("Mark_ID")
+  text String @map("Text")
+
+  hardSkills HardSkill[]
 
   @@map("HardSkillsMarks")
 }
 
-model SoftSkillsMark {
-  markId Int    @id @map("Mark_ID")
-  text   String @map("Text")
+/// join table for hard-skills ratings
+model HardSkill {
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+  assessmentId Int        @map("Assessment_ID")
 
-  comments Comment[] @relation("SoftSkillsMarkToComments")
+  section    HardSkillsSection @relation(fields: [questionId], references: [id])
+  questionId Int               @map("Question_ID")
 
-  @@map("SoftSkillsMarks")
+  mark   HardSkillsMark @relation(fields: [markId], references: [id])
+  markId Int            @map("Mark_ID")
+
+  @@id([assessmentId, questionId])
+  @@map("HardSkills")
 }
 
 model Area {
-  areaId Int    @id @map("Area_ID")
-  text   String @map("Text")
+  id   Int    @id @map("Area_ID")
+  text String @map("Text")
 
   softSkills SoftSkillsTable[]
 
@@ -48,57 +64,46 @@ model Area {
 }
 
 model Competency {
-  competencyId Int    @id @map("Competency_ID")
-  text         String @map("Text")
+  id   Int    @id @map("Competency_ID")
+  text String @map("Text")
 
-  hardSkills HardSkill[]       @relation("CompetencyToHardSkills")
   softSkills SoftSkillsTable[]
 
   @@map("Competencies")
 }
 
-model HardSkill {
-  assessment   Assessment @relation("AssessmentToHardSkills", fields: [assessmentId], references: [assessmentId], onDelete: Cascade, onUpdate: Cascade)
-  assessmentId Int        @map("Assessment_ID")
+model SoftSkillsMark {
+  id   Int    @id @map("Mark_ID")
+  text String @map("Text")
 
-  competency Competency @relation("CompetencyToHardSkills", fields: [questionId], references: [competencyId], onDelete: Restrict, onUpdate: Cascade)
-  questionId Int        @map("Question_ID")
+  comments Comment[]
 
-  mark   HardSkillsMark @relation("HardSkillsToHardSkillsMark", fields: [markId], references: [markId], onDelete: Restrict, onUpdate: Cascade)
-  markId Int            @map("Mark_ID")
-
-  @@id([assessmentId, questionId])
-  @@map("HardSkills")
+  @@map("SoftSkillsMarks")
 }
 
 model SoftSkillsTable {
-  key Int @id @map("KEY")
+  key          Int @id @map("KEY")
+  assessmentId Int @map("Assessment_ID")
+  areaId       Int @map("Area_ID")
+  competencyId Int @map("Competency_ID")
 
-  assessment   Assessment @relation(fields: [assessmentId], references: [assessmentId], onDelete: Cascade, onUpdate: Cascade)
-  assessmentId Int        @map("Assessment_ID")
+  assessment Assessment @relation(fields: [assessmentId], references: [id])
+  area       Area       @relation(fields: [areaId], references: [id])
+  competency Competency @relation(fields: [competencyId], references: [id])
 
-  area   Area @relation(fields: [areaId], references: [areaId], onDelete: Restrict, onUpdate: Cascade)
-  areaId Int  @map("Area_ID")
+  comments Comment[]
 
-  competency   Competency @relation(fields: [competencyId], references: [competencyId], onDelete: Restrict, onUpdate: Cascade)
-  competencyId Int        @map("Competency_ID")
-
-  comments Comment[] @relation("SoftSkillsTableToComments")
-
-  @@unique([assessmentId, areaId, competencyId])
   @@map("SoftSkillsTable")
 }
 
 model Comment {
-  commentId Int @id @default(autoincrement()) @map("Comment_ID")
+  id          Int    @id @map("Comment_ID")
+  key         Int    @map("KEY")
+  markId      Int    @map("Mark_ID")
+  commentText String @map("Comment")
 
-  softSkill    SoftSkillsTable @relation("SoftSkillsTableToComments", fields: [softSkillKey], references: [key])
-  softSkillKey Int             @map("KEY")
-
-  mark   SoftSkillsMark @relation("SoftSkillsMarkToComments", fields: [markId], references: [markId])
-  markId Int            @map("Mark_ID")
-
-  comment String @map("Comment")
+  softSkill SoftSkillsTable @relation(fields: [key], references: [key])
+  mark      SoftSkillsMark  @relation(fields: [markId], references: [id])
 
   @@map("Comments")
 }

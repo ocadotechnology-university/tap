@@ -24,20 +24,21 @@ export async function createAssessmentListService({
   // const storedAssessments = new Array<Assessment>();
 
   return {
-    // async createAssessment(options) {
-    //   const createdBy = options.credentials.principal.userEntityRef;
+    async createAssessment(options, targetUser, teamId) {
+      const createdBy = options.credentials.principal.userEntityRef;
 
-    //   const newAssessment = prisma.assessment.create({
-    //     data: {
-    //       createdBy
-    //     }
-    //   })
+      const newAssessment = prisma.assessment.create({
+        data: {
+          createdBy: createdBy,
+          targetUser: targetUser,
+          groupId: teamId
+        }
+      })
 
-    //   logger.info('Created new assessment by', { createdBy });
+      logger.info('Created new assessment by', { createdBy });
 
-    //   return newAssessment;
-    // },
-
+      return newAssessment;
+    },
     async getAssessments(options, teamId) {
       const user = options.credentials.principal.userEntityRef;
       const assessments = await prisma.assessment.findMany({
