@@ -23,7 +23,7 @@ CREATE TABLE "Assessments" (
     "createdBy" TEXT NOT NULL,
     "targetUser" TEXT NOT NULL,
     "Date" TIMESTAMP(3) NOT NULL,
-    "GroupID" INTEGER,
+    "GroupID" TEXT NOT NULL,
 
     CONSTRAINT "Assessments_pkey" PRIMARY KEY ("Assessment_ID")
 );

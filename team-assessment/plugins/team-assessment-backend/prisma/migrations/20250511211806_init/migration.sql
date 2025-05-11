@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Assessments" ALTER COLUMN "GroupID" SET DATA TYPE TEXT;
