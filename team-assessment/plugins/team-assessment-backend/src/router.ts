@@ -39,9 +39,10 @@ export async function createRouter({
 
     res.json(
       await teamAssessmentListService.getAssessments({
-        credentials: await httpAuth.credentials(req, { allow: ['user'] })},
+        credentials: await httpAuth.credentials(req, { allow: ['user'] })
+      },
         String(teamId)
-    ));
+      ));
   });
 
   router.get('/getSampleText', async (req, res) => {
