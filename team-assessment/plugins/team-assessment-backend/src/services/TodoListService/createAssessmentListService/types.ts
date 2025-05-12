@@ -11,6 +11,12 @@ export interface Assessment {
   groupId: string;
 }
 
+export interface HardSkill {
+  assessmentId: number;
+  questionId: number;
+  markId: number;
+}
+
 export interface TeamAssessmentListService {
   createAssessment(
     options: {
@@ -19,6 +25,13 @@ export interface TeamAssessmentListService {
     targetUser: string,
     groupId: string
   ): Promise<Assessment>;
+
+  upsertHardSkill(
+    options: { credentials: BackstageCredentials<BackstageUserPrincipal> },
+    assessmentId: number,
+    questionId: number,
+    markId: number,
+  ): Promise<HardSkill>;
 
   getAssessments(options: {
     credentials: BackstageCredentials<BackstageUserPrincipal>;

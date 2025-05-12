@@ -22,16 +22,18 @@ model Assessment {
 }
 
 model HardSkillsSection {
-  id         Int         @id @default(autoincrement()) @map("Question_ID")
-  text       String      @unique @map("Text")
+  id   Int    @id @default(autoincrement()) @map("Question_ID")
+  text String @unique @map("Text")
+
   hardSkills HardSkill[]
 
   @@map("HardSkillsSections")
 }
 
 model HardSkillsMark {
-  id         Int         @id @default(autoincrement()) @map("Mark_ID")
-  text       String      @unique @map("Text")
+  id   Int    @id @default(autoincrement()) @map("Mark_ID")
+  text String @unique @map("Text")
+
   hardSkills HardSkill[]
 
   @@map("HardSkillsMarks")
@@ -51,8 +53,9 @@ model HardSkill {
 }
 
 model Area {
-  id           Int               @id @default(autoincrement()) @map("Area_ID")
-  text         String            @unique @map("Text")
+  id   Int    @id @default(autoincrement()) @map("Area_ID")
+  text String @unique @map("Text")
+
   competencies Competency[]
   softSkills   SoftSkillsTable[]
 
@@ -72,10 +75,10 @@ model Competency {
 }
 
 model SoftSkillsMark {
-  id         Int               @id @default(autoincrement()) @map("Mark_ID")
-  text       String            @unique @map("Text")
-  comments   Comment[]
-  softSkills SoftSkillsTable[]
+  id   Int    @id @default(autoincrement()) @map("Mark_ID")
+  text String @unique @map("Text")
+
+  comments Comment[]
 
   @@map("SoftSkillsMarks")
 }
@@ -84,17 +87,14 @@ model SoftSkillsTable {
   assessmentId Int @map("Assessment_ID")
   areaId       Int @map("Area_ID")
   competencyId Int @map("Competency_ID")
+  key          Int @unique @default(dbgenerated()) @map("KEY")
 
-  key Int @unique @default(dbgenerated()) @map("KEY")
+  assessment Assessment @relation(fields: [assessmentId], references: [id])
+  area       Area       @relation(fields: [areaId], references: [id])
+  competency Competency @relation(fields: [areaId, competencyId], references: [areaId, competencyId])
+  comments   Comment[]
 
-  assessment       Assessment      @relation(fields: [assessmentId], references: [id])
-  area             Area            @relation(fields: [areaId], references: [id])
-  competency       Competency      @relation(fields: [areaId, competencyId], references: [areaId, competencyId])
-  comments         Comment[]
-  SoftSkillsMark   SoftSkillsMark? @relation(fields: [softSkillsMarkId], references: [id])
-  softSkillsMarkId Int?
-
-  @@id([assessmentId, areaId, competencyId])
+  @@id([assessmentId, areaId, competencyId, key])
   @@map("SoftSkillsTable")
 }
 

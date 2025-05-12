@@ -2,7 +2,7 @@ import { AuthService, LoggerService } from '@backstage/backend-plugin-api';
 import { NotFoundError } from '@backstage/errors';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
 // import crypto from 'node:crypto';
-import { Assessment, TeamAssessmentListService } from './types';
+import { Assessment, TeamAssessmentListService, HardSkill } from './types';
 import prisma from '../../../prismaClient'
 
 // TEMPLATE NOTE:
@@ -39,6 +39,35 @@ export async function createAssessmentListService({
 
       return newAssessment;
     },
+
+
+    async upsertHardSkill(options, assessmentId, questionId, markId) {
+      const createdBy = options.credentials.principal.userEntityRef;
+
+      const hardSkill = await prisma.hardSkill.upsert({
+        where: {
+          assessmentId_questionId: { assessmentId, questionId },
+        },
+        update: {
+          markId,
+        },
+        create: {
+          assessmentId,
+          questionId,
+          markId,
+        },
+      });
+
+      logger.info('Upsert hard skill', {
+        createdBy,
+        assessmentId,
+        questionId,
+        markId,
+      });
+
+      return hardSkill as HardSkill;
+    },
+
 
     async addComment(options, key, markId, commentText) {
       const createdBy = options.credentials.principal.userEntityRef;

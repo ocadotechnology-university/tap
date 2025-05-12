@@ -65,9 +65,8 @@ CREATE TABLE "SoftSkillsTable" (
     "Area_ID" INTEGER NOT NULL,
     "Competency_ID" INTEGER NOT NULL,
     "KEY" INTEGER NOT NULL,
-    "softSkillsMarkId" INTEGER,
 
-    CONSTRAINT "SoftSkillsTable_pkey" PRIMARY KEY ("Assessment_ID","Area_ID","Competency_ID")
+    CONSTRAINT "SoftSkillsTable_pkey" PRIMARY KEY ("Assessment_ID","Area_ID","Competency_ID","KEY")
 );
 
 -- CreateTable
@@ -115,9 +114,6 @@ ALTER TABLE "SoftSkillsTable" ADD CONSTRAINT "SoftSkillsTable_Area_ID_fkey" FORE
 
 -- AddForeignKey
 ALTER TABLE "SoftSkillsTable" ADD CONSTRAINT "SoftSkillsTable_Area_ID_Competency_ID_fkey" FOREIGN KEY ("Area_ID", "Competency_ID") REFERENCES "Competencies"("Area_ID", "Competency_ID") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "SoftSkillsTable" ADD CONSTRAINT "SoftSkillsTable_softSkillsMarkId_fkey" FOREIGN KEY ("softSkillsMarkId") REFERENCES "SoftSkillsMarks"("Mark_ID") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Comments" ADD CONSTRAINT "Comments_KEY_fkey" FOREIGN KEY ("KEY") REFERENCES "SoftSkillsTable"("KEY") ON DELETE RESTRICT ON UPDATE CASCADE;

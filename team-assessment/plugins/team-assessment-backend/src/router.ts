@@ -36,6 +36,19 @@ export async function createRouter({
     res.status(201).json(result);
   });
 
+  router.post('/setHardSkillMark', async (req, res) => {
+    const { assessmentId, questionId, markId } = req.body;
+
+    const result = await teamAssessmentListService.upsertHardSkill(
+      { credentials: await httpAuth.credentials(req, { allow: ['user'] }) },
+      Number(assessmentId),
+      Number(questionId),
+      Number(markId),
+    );
+
+    res.status(201).json(result);
+  });
+
   router.post('/addComment', async (req, res) => {
     const { key, markId, commentText } = req.body;
 
