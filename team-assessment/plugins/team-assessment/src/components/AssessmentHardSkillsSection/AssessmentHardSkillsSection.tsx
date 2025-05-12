@@ -65,17 +65,22 @@ const useStyles = makeStyles(theme => ({
 
 interface Props {
     skill: Skill;
+    selectedAnswer: string;
+    onAnswerChange: (answer: string) => void;
 }
 
-export const AssessmentHardSkillsSection: React.FC<Props> = ({ skill }) => {
+export const AssessmentHardSkillsSection: React.FC<Props> = ({
+    skill,
+    selectedAnswer,
+    onAnswerChange
+}) => {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
     const handleOpen = (e: MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
     const handleClose = () => setAnchorEl(null);
-    const handleSelect = (opt: string) => {
-        setSelectedAnswer(opt);
+    const handleSelect = (label: string) => {
+        onAnswerChange(label);
         handleClose();
     };
 

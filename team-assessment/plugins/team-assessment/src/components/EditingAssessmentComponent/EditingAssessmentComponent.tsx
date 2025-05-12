@@ -1,4 +1,3 @@
-// team-assessment/plugins/team-assessment/src/components/EditingAssessmentComponent/EditingAssessmentComponent.tsx
 import React, { useState } from 'react';
 import { Page, Header, Content } from '@backstage/core-components';
 import { makeStyles, Theme } from '@material-ui/core/styles';
@@ -17,6 +16,8 @@ type Props = {
   configData: Record<string, Skill[]>;
   onBackToMain: () => void;
 };
+
+type Answers = Record<string, string>;
 
 const useStyles = makeStyles((theme: Theme) => ({
   content: {
@@ -62,9 +63,12 @@ export const EditingAssessmentComponent: React.FC<Props> = ({
   onBackToMain,
 }) => {
   const classes = useStyles();
-  const [currentStage, setCurrentStage] = useState<'softSkills' | 'hardSkills'>(
-    'softSkills',
-  );
+  const [currentStage, setCurrentStage] = useState<'softSkills' | 'hardSkills'>('softSkills');
+  const [hardSkillsAnswers, setHardSkillsAnswers] = useState<Answers>({});
+
+  const handleAnswerChange = (skillTitle: string, answer: string) => {
+    setHardSkillsAnswers(prev => ({ ...prev, [skillTitle]: answer }));
+  };
 
   return (
     <Page themeId="tool">
@@ -74,7 +78,11 @@ export const EditingAssessmentComponent: React.FC<Props> = ({
           <EditingSoftSkillsComponent configData={configData} />
         )}
         {currentStage === 'hardSkills' && (
-          <EditingHardSkillsComponent configData={configData} />
+          <EditingHardSkillsComponent
+            configData={configData}
+            answers={hardSkillsAnswers}
+            onAnswerChange={handleAnswerChange}
+          />
         )}
       </Content>
 
