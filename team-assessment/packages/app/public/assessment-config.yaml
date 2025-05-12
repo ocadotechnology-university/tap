@@ -1,38 +1,182 @@
 Soft Skills:
-  - title: Communication
-    description: This section assesses communication skills within the team, including both verbal and non-verbal communication.
+  # Area: Communication
+  - area: Communication
+    title: English Proficiency
+    description: Measures verbal and written proficiency in English.
     labels:
       - Development need
       - Bar
       - Excellent
       - Leading
 
-  - title: Teamwork
-    description: This section evaluates collaboration and teamwork abilities, focusing on how well the team works together to achieve goals.
+  - area: Communication
+    title: French Proficiency
+    description: Evaluates ability to communicate clearly in French.
     labels:
       - Development need
       - Bar
       - Excellent
       - Leading
 
-  - title: Adaptability
-    description: This section examines how well team members adjust to changes in the workplace and handle unexpected challenges.
+  - area: Communication
+    title: Non-verbal Cues
+    description: Assesses understanding and use of body language.
     labels:
       - Development need
       - Bar
       - Excellent
       - Leading
 
-  - title: Problem Solving
-    description: This section assesses the ability to identify, analyze, and resolve problems effectively in a timely manner.
+  - area: Communication
+    title: Active Listening
+    description: Gauges ability to listen attentively and respond.
     labels:
       - Development need
       - Bar
       - Excellent
       - Leading
 
-  - title: Leadership
-    description: This section evaluates leadership qualities, including decision-making, team motivation, and providing guidance to others.
+  - area: Communication
+    title: Presentation Skills
+    description: Tests clarity and confidence in presenting ideas.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  # Area: Teamwork
+  - area: Teamwork
+    title: Collaboration
+    description: Evaluates working together toward common goals.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  - area: Teamwork
+    title: Conflict Resolution
+    description: Measures ability to resolve disagreements constructively.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  - area: Teamwork
+    title: Peer Support
+    description: Assesses willingness to help and mentor teammates.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  - area: Teamwork
+    title: Accountability
+    description: Tests ownership of tasks and reliability under pressure.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  - area: Teamwork
+    title: Delegation
+    description: Gauges skill in assigning tasks effectively.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  # Area: Adaptability
+  - area: Adaptability
+    title: Learning Agility
+    description: Measures speed of acquiring new skills and knowledge.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  - area: Adaptability
+    title: Flexibility
+    description: Evaluates willingness to adjust plans as circumstances change.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  - area: Adaptability
+    title: Open-mindedness
+    description: Assesses receptiveness to new ideas and feedback.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  - area: Adaptability
+    title: Stress Management
+    description: Gauges ability to stay calm under pressure.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  - area: Adaptability
+    title: Innovation
+    description: Tests creativity in finding new solutions.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  # Area: Problem Solving
+  - area: Problem Solving
+    title: Analytical Thinking
+    description: Measures ability to break problems into parts and analyze.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  - area: Problem Solving
+    title: Critical Reasoning
+    description: Evaluates logic and soundness of conclusions.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  - area: Problem Solving
+    title: Root Cause Analysis
+    description: Assesses skill in identifying underlying issues.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  - area: Problem Solving
+    title: Decision Making
+    description: Tests ability to make timely, well-informed decisions.
+    labels:
+      - Development need
+      - Bar
+      - Excellent
+      - Leading
+
+  - area: Problem Solving
+    title: Creativity
+    description: Gauges inventiveness in proposing solutions.
     labels:
       - Development need
       - Bar

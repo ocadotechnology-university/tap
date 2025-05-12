@@ -22,77 +22,79 @@ model Assessment {
 }
 
 model HardSkillsSection {
-  id   Int    @id @map("Question_ID")
-  text String @map("Text")
-
+  id         Int         @id @default(autoincrement()) @map("Question_ID")
+  text       String      @map("Text")
   hardSkills HardSkill[]
 
   @@map("HardSkillsSections")
 }
 
 model HardSkillsMark {
-  id   Int    @id @map("Mark_ID")
-  text String @map("Text")
-
+  id         Int         @id @default(autoincrement()) @map("Mark_ID")
+  text       String      @map("Text")
   hardSkills HardSkill[]
 
   @@map("HardSkillsMarks")
 }
 
-/// join table for hard-skills ratings
 model HardSkill {
-  assessment   Assessment @relation(fields: [assessmentId], references: [id])
-  assessmentId Int        @map("Assessment_ID")
+  assessmentId Int @map("Assessment_ID")
+  questionId   Int @map("Question_ID")
+  markId       Int @map("Mark_ID")
 
+  assessment Assessment        @relation(fields: [assessmentId], references: [id])
   section    HardSkillsSection @relation(fields: [questionId], references: [id])
-  questionId Int               @map("Question_ID")
-
-  mark   HardSkillsMark @relation(fields: [markId], references: [id])
-  markId Int            @map("Mark_ID")
+  mark       HardSkillsMark    @relation(fields: [markId], references: [id])
 
   @@id([assessmentId, questionId])
   @@map("HardSkills")
 }
 
 model Area {
-  id   Int    @id @default(autoincrement()) @map("Area_ID")
-  text String @unique @map("Text")
-
-  softSkills SoftSkillsTable[]
+  id           Int               @id @default(autoincrement()) @map("Area_ID")
+  text         String            @unique @map("Text")
+  competencies Competency[]
+  softSkills   SoftSkillsTable[]
 
   @@map("Areas")
 }
 
 model Competency {
-  id   Int    @id @map("Competency_ID")
-  text String @map("Text")
+  areaId       Int    @map("Area_ID")
+  competencyId Int    @map("Competency_ID")
+  text         String @map("Text")
 
+  area       Area              @relation(fields: [areaId], references: [id])
   softSkills SoftSkillsTable[]
 
+  @@id([areaId, competencyId])
   @@map("Competencies")
 }
 
 model SoftSkillsMark {
-  id   Int    @id @default(autoincrement()) @map("Mark_ID")
-  text String @unique @map("Text")
-
-  comments Comment[]
+  id         Int               @id @default(autoincrement()) @map("Mark_ID")
+  text       String            @unique @map("Text")
+  comments   Comment[]
+  softSkills SoftSkillsTable[]
 
   @@map("SoftSkillsMarks")
 }
 
 model SoftSkillsTable {
-  key          Int @id @map("KEY")
   assessmentId Int @map("Assessment_ID")
   areaId       Int @map("Area_ID")
   competencyId Int @map("Competency_ID")
 
-  assessment Assessment @relation(fields: [assessmentId], references: [id])
-  area       Area       @relation(fields: [areaId], references: [id])
-  competency Competency @relation(fields: [competencyId], references: [id])
+  key Int @unique @default(dbgenerated()) @map("KEY")
 
-  comments Comment[]
+  assessment       Assessment      @relation(fields: [assessmentId], references: [id])
+  area             Area            @relation(fields: [areaId], references: [id])
+  competency       Competency      @relation(fields: [areaId, competencyId], references: [areaId, competencyId])
+  comments         Comment[]
+  SoftSkillsMark   SoftSkillsMark? @relation(fields: [softSkillsMarkId], references: [id])
+  softSkillsMarkId Int?
 
+  @@id([assessmentId, areaId, competencyId])
   @@map("SoftSkillsTable")
 }
 
