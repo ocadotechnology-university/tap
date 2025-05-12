@@ -14,6 +14,23 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     flexWrap: 'wrap',
     margin: theme.spacing(-1),
+    padding: theme.spacing(2),
+  },
+  sectionHeader: {
+    width: '100%',
+    padding: theme.spacing(3, 2),
+    '& h2': {
+      color: theme.palette.text.primary,
+      marginBottom: theme.spacing(1),
+      fontSize: '1.5rem',
+      fontWeight: 600,
+    },
+    '& p': {
+      color: theme.palette.text.secondary,
+      fontSize: '0.95rem',
+      lineHeight: 1.6,
+      maxWidth: 800,
+    },
   },
 }));
 
@@ -30,15 +47,27 @@ export const EditingHardSkillsComponent: React.FC<Props> = ({
   const hardArray: Skill[] = hardKey ? configData[hardKey] : [];
 
   return (
-    <div className={classes.root}>
-      {hardArray.map((skill, idx) => (
-        <AssessmentHardSkillsSection
-          key={idx}
-          skill={skill}
-          selectedAnswer={answers[skill.title] || ''}
-          onAnswerChange={(answer) => onAnswerChange(skill.title, answer)}
-        />
-      ))}
+    <div>
+      {/* Заголовок и описание раздела */}
+      <div className={classes.sectionHeader}>
+        <h2>Hard Skills Assessment</h2>
+        <p>
+          Evaluate technical proficiency across key development areas.
+          Select ratings based on demonstrated expertise and practical implementation.
+        </p>
+      </div>
+
+      {/* Карточки с навыками */}
+      <div className={classes.root}>
+        {hardArray.map((skill, idx) => (
+          <AssessmentHardSkillsSection
+            key={skill.title + idx}
+            skill={skill}
+            selectedAnswer={answers[skill.title] || ''}
+            onAnswerChange={(answer) => onAnswerChange(skill.title, answer)}
+          />
+        ))}
+      </div>
     </div>
   );
 };

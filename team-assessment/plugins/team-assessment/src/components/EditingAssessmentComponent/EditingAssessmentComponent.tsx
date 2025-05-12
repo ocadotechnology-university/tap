@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Page, Header, Content } from '@backstage/core-components';
-import { makeStyles, Theme } from '@material-ui/core/styles';
-import { Button } from '@material-ui/core';
+import { makeStyles, Theme, useTheme } from '@material-ui/core/styles';
+import { Button, Divider } from '@material-ui/core';
 import { EditingSoftSkillsComponent } from '../EditingSoftSkillsComponent/EditingSoftSkillsComponent';
 import { EditingHardSkillsComponent } from '../EditingHardSkillsComponent/EditingHardSkillsComponent';
 
@@ -20,41 +20,46 @@ type Props = {
 type Answers = Record<string, string>;
 
 const useStyles = makeStyles((theme: Theme) => ({
+  rootContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: '100vh',
+  },
   content: {
+    flex: 1,
     padding: 0,
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(10),
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(2),
+
   },
   bottomNav: {
-    position: 'fixed',
+    width: '100%',
+    display: 'flex',
     bottom: theme.spacing(3),
     right: theme.spacing(84),
-    display: 'flex',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: theme.spacing(1.5),
-    flexWrap: 'wrap',
-    zIndex: 1000,
+    gap: theme.spacing(2),
+    padding: theme.spacing(3),
+    backgroundColor: 'transparent', // Убрали фон
+    marginTop: 'auto',
   },
   navButton: {
-    flex: '0 1 auto',
-    minWidth: 96,
-    borderRadius: 20,
-    textTransform: 'none',
-    fontSize: '0.9rem',
-    padding: theme.spacing(1.5, 2.5),
-    transition: 'transform 150ms ease, background-color 150ms ease',
+    minWidth: 160,
+    borderRadius: 24,
+    padding: theme.spacing(1.5, 3),
+    fontWeight: 600,
+    transition: 'all 0.3s ease',
     '&:hover': {
-      transform: 'scale(1.05)',
-      backgroundColor: theme.palette.action.hover,
+      transform: 'translateY(-2px)',
+      boxShadow: theme.shadows[4],
     },
-    '&:active': {
-      transform: 'scale(0.98)',
+    '&.MuiButton-contained': {
+      color: theme.palette.common.white,
     },
-    color: '#fff',
   },
 }));
 
@@ -63,6 +68,7 @@ export const EditingAssessmentComponent: React.FC<Props> = ({
   onBackToMain,
 }) => {
   const classes = useStyles();
+  const theme = useTheme();
   const [currentStage, setCurrentStage] = useState<'softSkills' | 'hardSkills'>('softSkills');
   const [hardSkillsAnswers, setHardSkillsAnswers] = useState<Answers>({});
 
@@ -70,60 +76,87 @@ export const EditingAssessmentComponent: React.FC<Props> = ({
     setHardSkillsAnswers(prev => ({ ...prev, [skillTitle]: answer }));
   };
 
+  const handleSubmit = () => {
+    console.log('Submitted answers:', hardSkillsAnswers);
+    onBackToMain();
+  };
+
   return (
     <Page themeId="tool">
       <Header title="Assessment Editing" />
-      <Content className={classes.content}>
-        {currentStage === 'softSkills' && (
-          <EditingSoftSkillsComponent configData={configData} />
-        )}
-        {currentStage === 'hardSkills' && (
-          <EditingHardSkillsComponent
-            configData={configData}
-            answers={hardSkillsAnswers}
-            onAnswerChange={handleAnswerChange}
+      <div className={classes.rootContainer}>
+        <Content className={classes.content}>
+          {currentStage === 'softSkills' && (
+            <EditingSoftSkillsComponent configData={configData} />
+          )}
+          {currentStage === 'hardSkills' && (
+            <EditingHardSkillsComponent
+              configData={configData}
+              answers={hardSkillsAnswers}
+              onAnswerChange={handleAnswerChange}
+            />
+          )}
+        </Content>
+
+        <div className={classes.bottomNav}>
+          <Button
+            onClick={() => setCurrentStage(prev =>
+              prev === 'softSkills' ? 'hardSkills' : 'softSkills'
+            )}
+            variant="contained"
+            className={classes.navButton}
+            style={{
+              backgroundColor: '#2196F3',
+              backgroundImage: 'none',
+            }}
+          >
+            {currentStage === 'softSkills' ? 'Hard Skills →' : '← Soft Skills'}
+          </Button>
+
+          <Divider
+            orientation="vertical"
+            flexItem
+            style={{
+              backgroundColor: 'rgba(0,0,0,0.1)',
+              height: 24,
+              margin: theme.spacing(0, 1),
+            }}
           />
-        )}
-      </Content>
 
-      <div className={classes.bottomNav}>
-        {currentStage === 'softSkills' ? (
           <Button
-            onClick={() => setCurrentStage('hardSkills')}
+            onClick={onBackToMain}
             variant="contained"
             className={classes.navButton}
-            style={{ backgroundColor: '#8dc6ff' }}
+            style={{
+              backgroundColor: '#FF4081',
+              backgroundImage: 'none',
+            }}
           >
-            Hard Skills
+            Back to Main
           </Button>
-        ) : (
+
+          <Divider
+            orientation="vertical"
+            flexItem
+            style={{
+              backgroundColor: 'rgba(0,0,0,0.1)',
+              height: 24,
+              margin: theme.spacing(0, 1),
+            }}
+          />
+
           <Button
-            onClick={() => setCurrentStage('softSkills')}
+            onClick={handleSubmit}
             variant="contained"
             className={classes.navButton}
-            style={{ backgroundColor: '#8dc6ff' }}
+            style={{
+              backgroundColor: '#4CAF50',
+              backgroundImage: 'none',
+            }}
           >
-            Soft Skills
+            Submit
           </Button>
-        )}
-
-        <Button
-          onClick={onBackToMain}
-          variant="contained"
-          className={classes.navButton}
-          style={{ backgroundColor: '#ff80bf' }}
-        >
-          Back to Main
-        </Button>
-
-        <Button
-          onClick={onBackToMain}
-          variant="contained"
-          className={classes.navButton}
-          style={{ backgroundColor: '#4caf50' }}
-        >
-          Submit
-        </Button>
+        </div>
       </div>
     </Page>
   );

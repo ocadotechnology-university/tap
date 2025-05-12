@@ -25,22 +25,26 @@ const useStyles = makeStyles(theme => ({
         '&:hover': {
             boxShadow: theme.shadows[6],
         },
+        minHeight: 160,
     },
     header: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
+        marginBottom: theme.spacing(1),
     },
     title: {
-        fontWeight: 500,
+        fontWeight: 600,
+        fontSize: '1.1rem',
+        flex: 1,
     },
     description: {
-        marginTop: theme.spacing(1),
         fontSize: '0.9rem',
+        color: 'rgba(255, 255, 255, 0.85)',
         lineHeight: 1.4,
+        marginTop: theme.spacing(1),
     },
     answerContainer: {
-        position: 'relative',
         display: 'inline-flex',
         alignItems: 'center',
         padding: theme.spacing(0.5, 1.5),
@@ -56,10 +60,6 @@ const useStyles = makeStyles(theme => ({
         fontWeight: 500,
         cursor: 'pointer',
         fontSize: '0.9rem',
-    },
-    menuPaper: {
-        marginTop: theme.spacing(1),
-        borderRadius: 8,
     },
 }));
 
@@ -88,7 +88,9 @@ export const AssessmentHardSkillsSection: React.FC<Props> = ({
         <>
             <Box className={classes.container}>
                 <Box className={classes.header}>
-                    <Typography className={classes.title}>{skill.title}</Typography>
+                    <Typography className={classes.title}>
+                        {skill.title}
+                    </Typography>
 
                     <Box display="flex" alignItems="center">
                         {!selectedAnswer ? (
@@ -121,25 +123,15 @@ export const AssessmentHardSkillsSection: React.FC<Props> = ({
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
-                classes={{ paper: classes.menuPaper }}
-                getContentAnchorEl={null}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-                MenuListProps={{
-                    style: {
-                        padding: 0,
-                    },
-                }}
             >
                 {skill.labels.map(label => (
                     <MenuItem
                         key={label}
                         selected={label === selectedAnswer}
                         onClick={() => handleSelect(label)}
-                        style={{
-                            minWidth: 120,
-                            fontSize: '0.9rem',
-                        }}
+                        style={{ minWidth: 140 }}
                     >
                         {label}
                     </MenuItem>

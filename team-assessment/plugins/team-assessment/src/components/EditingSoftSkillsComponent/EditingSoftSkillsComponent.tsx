@@ -16,12 +16,12 @@ const useStyles = makeStyles(theme => ({
     marginBottom: theme.spacing(3),
   },
   title: {
-    fontSize: '1.5rem',
+    fontSize: '2rem',
     fontWeight: 600,
     color: theme.palette.text.primary,
   },
   description: {
-    fontSize: '0.9rem',
+    fontSize: '1rem',
     color: theme.palette.text.secondary,
     marginTop: theme.spacing(1),
     lineHeight: 1.5,
@@ -69,4 +69,3 @@ export const EditingSoftSkillsComponent: React.FC<Props> = ({ configData }) => {
     </div>
   );
 };
-
