@@ -2,8 +2,15 @@ import React from 'react';
 import { makeStyles, Typography } from '@material-ui/core';
 import { AssessmentSoftSkillsSection } from '../AssessmentSoftSkillsSection';
 
+type SoftSkill = {
+  area: string;
+  title: string;
+  description: string;
+  labels: string[];
+};
+
 type Props = {
-  configData: Record<string, { area: string, description: string, labels: string[] }[]>;
+  configData: Record<string, SoftSkill[]>;
 };
 
 const useStyles = makeStyles(theme => ({
@@ -12,45 +19,41 @@ const useStyles = makeStyles(theme => ({
   },
   header: {
     marginBottom: theme.spacing(3),
-    padding: theme.spacing(0, 2),
   },
   title: {
     fontSize: '1.5rem',
     fontWeight: 600,
     color: theme.palette.text.primary,
-    marginBottom: theme.spacing(1),
   },
   description: {
     fontSize: '0.9rem',
     color: theme.palette.text.secondary,
+    marginTop: theme.spacing(1),
     lineHeight: 1.5,
   },
   content: {
-    padding: '0px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
+    paddingTop: '1rem',
   },
 }));
 
-export const EditingSoftSkillsComponent = ({ configData }: Props) => {
+export const EditingSoftSkillsComponent: React.FC<Props> = ({ configData }) => {
   const classes = useStyles();
 
-  // Collect unique areas
-  const uniqueAreas = new Set<string>();
-  const allSections = Object.values(configData).flat();
-
-  allSections.forEach(section => {
-    if (section.area?.trim()) {
-      uniqueAreas.add(section.area.trim());
-    }
-  });
-
-  // Group sections by area
-  const groupedSections = Array.from(uniqueAreas).map(area => ({
-    area,
-    sections: allSections.filter(section => section.area === area)
-  }));
+  const groupedSections = Object.values(configData).reduce(
+    (acc, sections) => {
+      sections.forEach(section => {
+        if (!section.area) {
+          return;
+        }
+        if (!acc[section.area]) {
+          acc[section.area] = [];
+        }
+        acc[section.area].push(section);
+      });
+      return acc;
+    },
+    {} as Record<string, SoftSkill[]>,
+  );
 
   return (
     <div className={classes.root}>
@@ -59,27 +62,22 @@ export const EditingSoftSkillsComponent = ({ configData }: Props) => {
           Soft Skills Assessment
         </Typography>
         <Typography className={classes.description}>
-          Evaluate essential interpersonal skills and behavioral competencies.
-          Expand each category to assess specific skills using standardized proficiency levels.
-          Select the most appropriate rating for each demonstrated capability.
+          Click on any category to view and assess detailed skills
         </Typography>
       </div>
 
       <div className={classes.content}>
-        {groupedSections.map(({ area, sections }) => (
+        {Object.entries(groupedSections).map(([area, sections]) => (
           <AssessmentSoftSkillsSection
             key={area}
             area={area}
-            description=""
-            labels={sections.flatMap(s => s.labels)}
+            sections={sections}
           />
         ))}
       </div>
     </div>
   );
 };
-
-
 
 
 // import React from 'react';
