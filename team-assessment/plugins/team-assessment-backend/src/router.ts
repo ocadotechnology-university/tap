@@ -36,6 +36,20 @@ export async function createRouter({
     res.status(201).json(result);
   });
 
+  router.post('/addComment', async (req, res) => {
+    const { key, markId, commentText } = req.body;
+
+    const result = await teamAssessmentListService.addComment(
+      {
+        credentials: await httpAuth.credentials(req, { allow: ['user'] }),
+      },
+      Number(key),
+      Number(markId),
+      String(commentText)
+    );
+    res.status(201).json(result);
+  });
+
   router.get('/getAssessments', async (req, res) => {
 
     const { teamId } = req.query;

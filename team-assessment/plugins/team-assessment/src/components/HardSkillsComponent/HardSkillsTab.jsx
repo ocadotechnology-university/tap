@@ -10,7 +10,7 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-// 8 вопросов → на md и выше по 4 в ряд → получится 2 ряда
+
 const questionsData = [
     'JavaScript',
     'Algorithms',

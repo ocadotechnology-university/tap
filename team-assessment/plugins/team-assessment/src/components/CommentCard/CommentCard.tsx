@@ -1,26 +1,65 @@
+// team-assessment/plugins/team-assessment/src/components/CommentCard.tsx
+
 import React, { useRef, useState } from 'react';
 import { Box, IconButton, Typography, TextField } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
+import { useApi, fetchApiRef, discoveryApiRef } from '@backstage/core-plugin-api';
 
 interface CommentCardProps {
   text: string;
+  // теперь прокидывайте из родителя эти пропсы
+  section: string;
+  teamId: string;
+  markId: number;
   onDelete: () => void;
 }
 
-export const CommentCard = ({ text, onDelete }: CommentCardProps) => {
+export const CommentCard: React.FC<CommentCardProps> = ({
+  text,
+  section,
+  teamId,
+  markId,
+  onDelete,
+}) => {
   const [comment, setComment] = useState(text);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fetchApi = useApi(fetchApiRef);
+  const discoveryApi = useApi(discoveryApiRef);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setComment(e.target.value);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown: React.KeyboardEventHandler<any> = async e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       inputRef.current?.blur();
-    }
-  };
+
+      const handleComment = async (key: number, markId: number, commentText: string) => {
+        const payload = {
+          key,
+          markId,
+          commentText
+        }
+
+        try {
+          const resp = await fetchApi.fetch('http://localhost:7007/api/team-assessment/addComment',
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+            });
+          if (!resp.ok) {
+            console.error('Failed to save comment:', await resp.text());
+          } else {
+            console.log('Comment saved');
+          }
+        } catch (error) {
+          console.error('Error saving comment:', error);
+        }
+      }
+    };
+  }
 
   return (
     <Box
@@ -59,9 +98,7 @@ export const CommentCard = ({ text, onDelete }: CommentCardProps) => {
           padding: '8px',
         }}
         InputProps={{
-          style: {
-            color: '#000',
-          },
+          style: { color: '#000' },
         }}
         onKeyDown={handleKeyDown}
         inputRef={inputRef}
@@ -76,8 +113,9 @@ export const CommentCard = ({ text, onDelete }: CommentCardProps) => {
           padding: 0,
         }}
       >
-        <DeleteIcon style={{ fontSize: '20px', color: '#9e9e9e' }} />
+        <DeleteIcon style={{ fontSize: 20, color: '#9e9e9e' }} />
       </IconButton>
     </Box>
   );
 };
+

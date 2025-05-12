@@ -39,6 +39,25 @@ export async function createAssessmentListService({
 
       return newAssessment;
     },
+
+    async addComment(options, key, markId, commentText) {
+      const createdBy = options.credentials.principal.userEntityRef;
+      const newComment = await prisma.comment.create({
+        data: {
+          key: key,
+          markId: markId,
+          commentText: commentText,
+        },
+      });
+
+      logger.info('Created comment by ', { createdBy });
+
+      return {
+        id: newComment.id.toString(),
+        commentText: newComment.commentText,
+      };
+    },
+
     async getAssessments(options, teamId) {
       const user = options.credentials.principal.userEntityRef;
       const assessments = await prisma.assessment.findMany({

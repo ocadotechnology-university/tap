@@ -97,7 +97,7 @@ model SoftSkillsTable {
 }
 
 model Comment {
-  id          Int    @id @map("Comment_ID")
+  id          Int    @id @default(autoincrement()) @map("Comment_ID")
   key         Int    @map("KEY")
   markId      Int    @map("Mark_ID")
   commentText String @map("Comment")

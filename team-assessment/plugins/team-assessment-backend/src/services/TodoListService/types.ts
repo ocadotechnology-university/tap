@@ -5,20 +5,20 @@ import {
 
 export interface Assessment {
   id: number;
-  date: Date;
   createdBy: string;
   targetUser: string;
-  groupId: string;
+  createdAt: Date;
 }
 
 export interface TeamAssessmentListService {
-  createAssessment(
-    options: {
-      credentials: BackstageCredentials<BackstageUserPrincipal>;
-    },
-    targetUser: string,
-    groupId: string
-  ): Promise<Assessment>;
+  // createAssessment(
+  //   input: {
+  //     entityRef?: string;
+  //   },
+  //   options: {
+  //     credentials: BackstageCredentials<BackstageUserPrincipal>;
+  //   },
+  // ): Promise<Assessment>;
 
   getAssessments(options: {
     credentials: BackstageCredentials<BackstageUserPrincipal>;
@@ -27,15 +27,6 @@ export interface TeamAssessmentListService {
   getSampleText(options: {
     credentials: BackstageCredentials<BackstageUserPrincipal>;
   }): Promise<{ message: string }>;
-
-  addComment(
-    options: {
-      credentials: BackstageCredentials<BackstageUserPrincipal>;
-    },
-    key: number,
-    markId: number,
-    commentText: string
-  ): Promise<{ id: string; commentText: string }>;
 }
 
 export interface Comment {
