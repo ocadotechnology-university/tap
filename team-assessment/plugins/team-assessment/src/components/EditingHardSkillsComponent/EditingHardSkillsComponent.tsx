@@ -1,30 +1,34 @@
+// team-assessment/plugins/team-assessment/src/components/EditingHardSkillsComponent/EditingHardSkillsComponent.tsx
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import HardSkillsTab from '../HardSkillsComponent/HardSkillsTab';
+import { makeStyles } from '@material-ui/core';
+import { AssessmentHardSkillsSection } from '../AssessmentHardSkillsSection/AssessmentHardSkillsSection';
+import { Skill } from '../EditingAssessmentComponent/EditingAssessmentComponent';
 
-const useStyles = makeStyles({
-  content: {
-    padding: 0,
-    paddingTop: '1rem',
+type Props = {
+  configData: Record<string, Skill[]>;
+};
+
+const useStyles = makeStyles(theme => ({
+  root: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
+    flexWrap: 'wrap',
+    margin: theme.spacing(-1),
   },
-  fullWidthButton: {
-    width: '100%',
-    marginTop: '1rem',
-  },
-});
+}));
 
-export const EditingHardSkillsComponent: React.FC = () => {
+export const EditingHardSkillsComponent: React.FC<Props> = ({ configData }) => {
   const classes = useStyles();
 
+  const hardKey = Object.keys(configData).find(k =>
+    k.toLowerCase().includes('hard'),
+  );
+  const hardArray: Skill[] = hardKey ? configData[hardKey] : [];
+
   return (
-    <div className={classes.content}>
-      <h3>Hard Skills Section</h3>
-      <HardSkillsTab />
-
-
+    <div className={classes.root}>
+      {hardArray.map((skill, idx) => (
+        <AssessmentHardSkillsSection key={idx} skill={skill} />
+      ))}
     </div>
   );
 };

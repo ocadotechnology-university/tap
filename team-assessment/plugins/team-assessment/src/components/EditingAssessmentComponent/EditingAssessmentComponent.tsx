@@ -1,13 +1,20 @@
-// src/components/EditingAssessmentComponent.tsx
+// team-assessment/plugins/team-assessment/src/components/EditingAssessmentComponent/EditingAssessmentComponent.tsx
 import React, { useState } from 'react';
 import { Page, Header, Content } from '@backstage/core-components';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
-import { EditingSoftSkillsComponent } from '../EditingSoftSkillsComponent';
-import { EditingHardSkillsComponent } from '../EditingHardSkillsComponent';
+import { EditingSoftSkillsComponent } from '../EditingSoftSkillsComponent/EditingSoftSkillsComponent';
+import { EditingHardSkillsComponent } from '../EditingHardSkillsComponent/EditingHardSkillsComponent';
+
+export type Skill = {
+  area?: string;
+  title: string;
+  description: string;
+  labels: string[];
+};
 
 type Props = {
-  configData: Record<string, { title: string; description: string; labels: string[] }[]>;
+  configData: Record<string, Skill[]>;
   onBackToMain: () => void;
 };
 
@@ -66,7 +73,9 @@ export const EditingAssessmentComponent: React.FC<Props> = ({
         {currentStage === 'softSkills' && (
           <EditingSoftSkillsComponent configData={configData} />
         )}
-        {currentStage === 'hardSkills' && <EditingHardSkillsComponent />}
+        {currentStage === 'hardSkills' && (
+          <EditingHardSkillsComponent configData={configData} />
+        )}
       </Content>
 
       <div className={classes.bottomNav}>

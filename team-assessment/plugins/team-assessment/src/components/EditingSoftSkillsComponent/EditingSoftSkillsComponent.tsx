@@ -1,16 +1,11 @@
+// team-assessment/plugins/team-assessment/src/components/EditingSoftSkillsComponent/EditingSoftSkillsComponent.tsx
 import React from 'react';
 import { makeStyles, Typography } from '@material-ui/core';
-import { AssessmentSoftSkillsSection } from '../AssessmentSoftSkillsSection';
-
-type SoftSkill = {
-  area: string;
-  title: string;
-  description: string;
-  labels: string[];
-};
+import { AssessmentSoftSkillsSection } from '../AssessmentSoftSkillsSection/AssessmentSoftSkillsSection';
+import { Skill } from '../EditingAssessmentComponent/EditingAssessmentComponent';
 
 type Props = {
-  configData: Record<string, SoftSkill[]>;
+  configData: Record<string, Skill[]>;
 };
 
 const useStyles = makeStyles(theme => ({
@@ -39,21 +34,17 @@ const useStyles = makeStyles(theme => ({
 export const EditingSoftSkillsComponent: React.FC<Props> = ({ configData }) => {
   const classes = useStyles();
 
-  const groupedSections = Object.values(configData).reduce(
-    (acc, sections) => {
-      sections.forEach(section => {
-        if (!section.area) {
-          return;
-        }
-        if (!acc[section.area]) {
-          acc[section.area] = [];
-        }
-        acc[section.area].push(section);
-      });
-      return acc;
-    },
-    {} as Record<string, SoftSkill[]>,
+  const softKey = Object.keys(configData).find(k =>
+    k.toLowerCase().includes('soft'),
   );
+  const softArray: Skill[] = softKey ? configData[softKey] : [];
+
+  const grouped = softArray.reduce<Record<string, Skill[]>>((acc, s) => {
+    if (!s.area) return acc;
+    if (!acc[s.area]) acc[s.area] = [];
+    acc[s.area].push(s);
+    return acc;
+  }, {});
 
   return (
     <div className={classes.root}>
@@ -67,7 +58,7 @@ export const EditingSoftSkillsComponent: React.FC<Props> = ({ configData }) => {
       </div>
 
       <div className={classes.content}>
-        {Object.entries(groupedSections).map(([area, sections]) => (
+        {Object.entries(grouped).map(([area, sections]) => (
           <AssessmentSoftSkillsSection
             key={area}
             area={area}
@@ -79,44 +70,3 @@ export const EditingSoftSkillsComponent: React.FC<Props> = ({ configData }) => {
   );
 };
 
-
-// import React from 'react';
-// import { makeStyles } from '@material-ui/core/styles';
-// import { AssessmentSoftSkillsSection } from '../AssessmentSoftSkillsSection';
-
-// type Props = {
-//   configData: Record<string, { title: string, description: string, labels: string[] }[]>;
-// };
-
-// const useStyles = makeStyles({
-//   content: {
-//     padding: '0px',
-//     paddingTop: '1rem',
-//     display: 'flex',
-//     flexDirection: 'column',
-//     gap: '1rem',
-//   },
-//   fullWidthButton: {
-//     width: '100%',
-//     marginTop: '1rem',
-//   },
-// });
-
-// export const EditingSoftSkillsComponent = ({ configData }: Props) => {
-//   const classes = useStyles();
-
-//   return (
-//     <div className={classes.content}>
-//       {Object.entries(configData).map(([category, sections]) =>
-//         sections.map(section => (
-//           <AssessmentSoftSkillsSection
-//             key={section.title}
-//             title={section.title}
-//             description={section.description}
-//             labels={section.labels}
-//           />
-//         ))
-//       )}
-//     </div>
-//   );
-// };
