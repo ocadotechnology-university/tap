@@ -1,3 +1,4 @@
+// team-assessment/plugins/team-assessment-backend/src/plugin.ts
 import {
   coreServices,
   createBackendPlugin,
@@ -5,6 +6,7 @@ import {
 import { createRouter } from './router';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
 import { createAssessmentListService } from './services/TodoListService/createAssessmentListService';
+import { loadAssessmentConfig } from './utils/loadAssessmentConfig';
 
 /**
  * The team asessment backend plugin
@@ -23,6 +25,8 @@ export const teamAssessmentBackendPlugin = createBackendPlugin({
         catalog: catalogServiceRef,
       },
       async init({ logger, auth, httpAuth, httpRouter, catalog }) {
+        await loadAssessmentConfig();
+
         const teamAssessmentListService = await createAssessmentListService({
           logger,
           auth,

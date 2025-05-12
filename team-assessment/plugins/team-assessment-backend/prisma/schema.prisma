@@ -55,8 +55,8 @@ model HardSkill {
 }
 
 model Area {
-  id   Int    @id @map("Area_ID")
-  text String @map("Text")
+  id   Int    @id @default(autoincrement()) @map("Area_ID")
+  text String @unique @map("Text")
 
   softSkills SoftSkillsTable[]
 
@@ -73,8 +73,8 @@ model Competency {
 }
 
 model SoftSkillsMark {
-  id   Int    @id @map("Mark_ID")
-  text String @map("Text")
+  id   Int    @id @default(autoincrement()) @map("Mark_ID")
+  text String @unique @map("Text")
 
   comments Comment[]
 
