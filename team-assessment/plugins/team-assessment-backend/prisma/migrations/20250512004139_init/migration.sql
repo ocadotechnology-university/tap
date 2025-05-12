@@ -22,10 +22,18 @@ CREATE TABLE "Assessments" (
     "Assessment_ID" SERIAL NOT NULL,
     "createdBy" TEXT NOT NULL,
     "targetUser" TEXT NOT NULL,
-    "Date" TIMESTAMP(3) NOT NULL,
+    "Date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "GroupID" TEXT NOT NULL,
 
     CONSTRAINT "Assessments_pkey" PRIMARY KEY ("Assessment_ID")
+);
+
+-- CreateTable
+CREATE TABLE "HardSkillsSections" (
+    "Question_ID" INTEGER NOT NULL,
+    "Text" TEXT NOT NULL,
+
+    CONSTRAINT "HardSkillsSections_pkey" PRIMARY KEY ("Question_ID")
 );
 
 -- CreateTable
@@ -37,11 +45,12 @@ CREATE TABLE "HardSkillsMarks" (
 );
 
 -- CreateTable
-CREATE TABLE "SoftSkillsMarks" (
+CREATE TABLE "HardSkills" (
+    "Assessment_ID" INTEGER NOT NULL,
+    "Question_ID" INTEGER NOT NULL,
     "Mark_ID" INTEGER NOT NULL,
-    "Text" TEXT NOT NULL,
 
-    CONSTRAINT "SoftSkillsMarks_pkey" PRIMARY KEY ("Mark_ID")
+    CONSTRAINT "HardSkills_pkey" PRIMARY KEY ("Assessment_ID","Question_ID")
 );
 
 -- CreateTable
@@ -61,12 +70,11 @@ CREATE TABLE "Competencies" (
 );
 
 -- CreateTable
-CREATE TABLE "HardSkills" (
-    "Assessment_ID" INTEGER NOT NULL,
-    "Question_ID" INTEGER NOT NULL,
+CREATE TABLE "SoftSkillsMarks" (
     "Mark_ID" INTEGER NOT NULL,
+    "Text" TEXT NOT NULL,
 
-    CONSTRAINT "HardSkills_pkey" PRIMARY KEY ("Assessment_ID","Question_ID")
+    CONSTRAINT "SoftSkillsMarks_pkey" PRIMARY KEY ("Mark_ID")
 );
 
 -- CreateTable
@@ -81,7 +89,7 @@ CREATE TABLE "SoftSkillsTable" (
 
 -- CreateTable
 CREATE TABLE "Comments" (
-    "Comment_ID" SERIAL NOT NULL,
+    "Comment_ID" INTEGER NOT NULL,
     "KEY" INTEGER NOT NULL,
     "Mark_ID" INTEGER NOT NULL,
     "Comment" TEXT NOT NULL,
@@ -89,20 +97,17 @@ CREATE TABLE "Comments" (
     CONSTRAINT "Comments_pkey" PRIMARY KEY ("Comment_ID")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "SoftSkillsTable_Assessment_ID_Area_ID_Competency_ID_key" ON "SoftSkillsTable"("Assessment_ID", "Area_ID", "Competency_ID");
+-- AddForeignKey
+ALTER TABLE "HardSkills" ADD CONSTRAINT "HardSkills_Assessment_ID_fkey" FOREIGN KEY ("Assessment_ID") REFERENCES "Assessments"("Assessment_ID") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "HardSkills" ADD CONSTRAINT "HardSkills_Assessment_ID_fkey" FOREIGN KEY ("Assessment_ID") REFERENCES "Assessments"("Assessment_ID") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "HardSkills" ADD CONSTRAINT "HardSkills_Question_ID_fkey" FOREIGN KEY ("Question_ID") REFERENCES "Competencies"("Competency_ID") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "HardSkills" ADD CONSTRAINT "HardSkills_Question_ID_fkey" FOREIGN KEY ("Question_ID") REFERENCES "HardSkillsSections"("Question_ID") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "HardSkills" ADD CONSTRAINT "HardSkills_Mark_ID_fkey" FOREIGN KEY ("Mark_ID") REFERENCES "HardSkillsMarks"("Mark_ID") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SoftSkillsTable" ADD CONSTRAINT "SoftSkillsTable_Assessment_ID_fkey" FOREIGN KEY ("Assessment_ID") REFERENCES "Assessments"("Assessment_ID") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "SoftSkillsTable" ADD CONSTRAINT "SoftSkillsTable_Assessment_ID_fkey" FOREIGN KEY ("Assessment_ID") REFERENCES "Assessments"("Assessment_ID") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "SoftSkillsTable" ADD CONSTRAINT "SoftSkillsTable_Area_ID_fkey" FOREIGN KEY ("Area_ID") REFERENCES "Areas"("Area_ID") ON DELETE RESTRICT ON UPDATE CASCADE;

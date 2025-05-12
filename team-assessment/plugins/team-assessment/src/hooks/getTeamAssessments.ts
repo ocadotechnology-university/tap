@@ -14,11 +14,11 @@ export const getTeamAssessments = () => {
   return useAsync(async () => {
     // Логування для перевірки отримання членів команди
     console.log('Starting to fetch team assessments...');
-    
+
     const members = entity.relations
       ?.filter(rel => rel.type === 'hasMember')
       .map(rel => rel.targetRef) || [];
-    
+
     console.log('Members:', members);
 
     const { items } = await catalogApi.getEntities({
@@ -36,13 +36,13 @@ export const getTeamAssessments = () => {
     console.log('Fetched users:', items);
 
     const assessedUsers = await fetchApi.fetch(
-        `http://localhost:7007/api/team-assessment/getassessments?teamId=${encodeURIComponent(entity.metadata.name)}`,
-        {
-            headers: {
-                Accept: 'application/json',
-            },
+      `http://localhost:7007/api/team-assessment/getassessments?teamId=${encodeURIComponent(entity.metadata.name)}`,
+      {
+        headers: {
+          Accept: 'application/json',
         },
-      ).then(res => res.json());
+      },
+    ).then(res => res.json());
 
     // Логування результату запиту на оцінку
     console.log('Assessed users data:', assessedUsers);
@@ -63,6 +63,7 @@ export const getTeamAssessments = () => {
         picture: user.spec?.profile?.picture,
         hasAssessment: assessedUsersSet.has(user.metadata.name),
       })),
+      teamId: entity.metadata.name,
       assessedUsers,
       hasAssessment: (userId: string) => assessedUsers.includes(userId),
     };
