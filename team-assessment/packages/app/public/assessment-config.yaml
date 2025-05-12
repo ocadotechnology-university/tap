@@ -182,3 +182,95 @@ Soft Skills:
       - Bar
       - Excellent
       - Leading
+      - WOW
+
+
+
+Hard Skills:
+  - title: JavaScript
+    description: >-
+      Assesses proficiency in core JavaScript concepts (ES6+, closures,
+      promises, async/await) and ability to write idiomatic JS.
+    labels:
+      - Bar
+      - Great
+      - Excellent
+      - Outstanding
+      - Leading
+
+  - title: Algorithms
+    description: >-
+      Evaluates ability to design, analyze and optimize algorithms for
+      time- and space-complexity in real-world scenarios.
+    labels:
+      - Bar
+      - Great
+      - Excellent
+      - Outstanding
+      - Leading
+
+  - title: System Design
+    description: >-
+      Measures skill in architecting scalable, resilient systems, including
+      microservices, databases and message-driven components.
+    labels:
+      - Bar
+      - Great
+      - Excellent
+      - Outstanding
+      - Leading
+
+  - title: Code Quality
+    description: >-
+      Assesses writing clear, maintainable code: proper abstractions,
+      naming, modularity and adherence to style guidelines.
+    labels:
+      - Bar
+      - Great
+      - Excellent
+      - Outstanding
+      - Leading
+
+  - title: Debugging
+    description: >-
+      Gauges efficiency in isolating, reproducing and resolving bugs using
+      logs, debuggers and profiling tools.
+    labels:
+      - Bar
+      - Great
+      - Excellent
+      - Outstanding
+      - Leading
+
+  - title: Testing
+    description: >-
+      Evaluates ability to write and maintain unit, integration and
+      end-to-end tests, including test strategy and tooling.
+    labels:
+      - Bar
+      - Great
+      - Excellent
+      - Outstanding
+      - Leading
+
+  - title: Architecture
+    description: >-
+      Measures understanding of high-level architectural patterns,
+      trade-offs and best practices (e.g. CQRS, event sourcing).
+    labels:
+      - Bar
+      - Great
+      - Excellent
+      - Outstanding
+      - Leading
+
+  - title: Security
+    description: >-
+      Assesses knowledge of common vulnerabilities (OWASP Top 10),
+      encryption, authentication and authorization strategies.
+    labels:
+      - Bar
+      - Great
+      - Excellent
+      - Outstanding
+      - Leading

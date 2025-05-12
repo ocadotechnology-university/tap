@@ -1,4 +1,5 @@
 // team-assessment/plugins/team-assessment-backend/src/plugin.ts
+
 import {
   coreServices,
   createBackendPlugin,
@@ -9,7 +10,7 @@ import { createAssessmentListService } from './services/TodoListService/createAs
 import { loadAssessmentConfig } from './utils/loadAssessmentConfig';
 
 /**
- * The team asessment backend plugin
+ * The team-assessment backend plugin
  *
  * @public
  */
@@ -25,7 +26,9 @@ export const teamAssessmentBackendPlugin = createBackendPlugin({
         catalog: catalogServiceRef,
       },
       async init({ logger, auth, httpAuth, httpRouter, catalog }) {
-        await loadAssessmentConfig();
+        loadAssessmentConfig()
+          .then(() => logger.info('Config sync completed'))
+          .catch(err => logger.error('Config sync failed', err));
 
         const teamAssessmentListService = await createAssessmentListService({
           logger,
@@ -39,6 +42,7 @@ export const teamAssessmentBackendPlugin = createBackendPlugin({
             teamAssessmentListService,
           }),
         );
+
       },
     });
   },

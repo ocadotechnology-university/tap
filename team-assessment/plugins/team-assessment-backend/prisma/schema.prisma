@@ -23,7 +23,7 @@ model Assessment {
 
 model HardSkillsSection {
   id         Int         @id @default(autoincrement()) @map("Question_ID")
-  text       String      @map("Text")
+  text       String      @unique @map("Text")
   hardSkills HardSkill[]
 
   @@map("HardSkillsSections")
@@ -31,7 +31,7 @@ model HardSkillsSection {
 
 model HardSkillsMark {
   id         Int         @id @default(autoincrement()) @map("Mark_ID")
-  text       String      @map("Text")
+  text       String      @unique @map("Text")
   hardSkills HardSkill[]
 
   @@map("HardSkillsMarks")
