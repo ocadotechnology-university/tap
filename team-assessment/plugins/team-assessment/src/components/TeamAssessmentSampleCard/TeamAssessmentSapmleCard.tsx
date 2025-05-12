@@ -33,9 +33,9 @@ export const TeamAssessmentSampleCard = ({ onStartEditing }: TeamAssessmentSampl
   console.log('value:', value);
   const fetchApi = useApi(fetchApiRef);
 
-  const handleAssessment = async (userId: string, teamId: string) => {
+  const handleAssessment = async (targetUser: string, teamId: string) => {
     const payload = {
-      userId,
+      targetUser,
       teamId
     }
   
