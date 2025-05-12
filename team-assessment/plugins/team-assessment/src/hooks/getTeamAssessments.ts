@@ -63,6 +63,7 @@ export const getTeamAssessments = () => {
         picture: user.spec?.profile?.picture,
         hasAssessment: assessedUsersSet.has(user.metadata.name),
       })),
+      teamId: entity.metadata.name,
       assessedUsers,
       hasAssessment: (userId: string) => assessedUsers.includes(userId),
     };

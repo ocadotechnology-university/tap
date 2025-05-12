@@ -27,7 +27,7 @@ export async function createAssessmentListService({
     async createAssessment(options, targetUser, teamId) {
       const createdBy = options.credentials.principal.userEntityRef;
 
-      const newAssessment = prisma.assessment.create({
+      const newAssessment = await prisma.assessment.create({
         data: {
           createdBy: createdBy,
           targetUser: targetUser,

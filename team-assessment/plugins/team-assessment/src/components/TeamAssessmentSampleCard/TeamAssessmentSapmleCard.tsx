@@ -4,6 +4,7 @@ import { Typography, Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { AssessmentCard } from '../AssessmentCard';
 import { getTeamAssessments } from '../../hooks/getTeamAssessments';
+import { useApi, fetchApiRef } from '@backstage/core-plugin-api';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -29,7 +30,22 @@ export interface TeamAssessmentSampleCardProps {
 export const TeamAssessmentSampleCard = ({ onStartEditing }: TeamAssessmentSampleCardProps) => {
   const classes = useStyles();
   const { loading, error, value } = getTeamAssessments();
-  console.log('value:', value); 
+  console.log('value:', value);
+  const fetchApi = useApi(fetchApiRef);
+
+  const handleAssessment = async (userId: string, teamId: string) => {
+    const payload = {
+      userId,
+      teamId
+    }
+  
+    await fetchApi.fetch('http://localhost:7007/api/team-assessment/createAssessment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  }
+
   return (
     <div className={classes.container}>
       <Typography variant="h6" className={classes.counter}>
@@ -47,6 +63,7 @@ export const TeamAssessmentSampleCard = ({ onStartEditing }: TeamAssessmentSampl
                 <AssessmentCard
                   user={user}
                   variant="create"
+                  onCreateAssessment={() => handleAssessment(user.id, value?.teamId)}
                   onStartEditing={onStartEditing}
                 />
               </Box>
