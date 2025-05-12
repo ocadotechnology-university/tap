@@ -23,7 +23,7 @@ export async function createRouter({
   // OpenAPI tooling: https://backstage.io/docs/next/openapi/01-getting-started
 
   router.post('/createAssessment', async (req, res) => {
-    const { targetUser, teamId } = req.query;
+    const { targetUser, teamId } = req.body;
 
     const result = await teamAssessmentListService.createAssessment(
       {
