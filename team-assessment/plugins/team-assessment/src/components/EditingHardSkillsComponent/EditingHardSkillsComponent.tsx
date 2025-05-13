@@ -5,6 +5,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { useApi, fetchApiRef } from '@backstage/core-plugin-api';
 import { AssessmentHardSkillsSection } from '../AssessmentHardSkillsSection/AssessmentHardSkillsSection';
 import { Skill } from '../EditingAssessmentComponent/EditingAssessmentComponent';
+import { TeamAssessmentSampleCardProps } from '../TeamAssessmentSampleCard/TeamAssessmentSapmleCard'
+
 
 const useStyles = makeStyles(theme => ({
   header: {
@@ -49,20 +51,20 @@ export const EditingHardSkillsComponent: React.FC<Props> = ({
 }) => {
   const classes = useStyles();
   const fetchApi = useApi(fetchApiRef);
-
   const [sectionMap, setSectionMap] = useState<SectionMap>({});
   const [markMap, setMarkMap] = useState<MarkMap>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function load() {
+    const loadMappings = async () => {
       try {
-        const [sRes, mRes] = await Promise.all([
+        const [sectionsRes, marksRes] = await Promise.all([
           fetchApi.fetch('http://localhost:7007/api/team-assessment/hardSkillSections'),
           fetchApi.fetch('http://localhost:7007/api/team-assessment/hardSkillMarks'),
         ]);
-        const sections: { id: number; text: string }[] = await sRes.json();
-        const marks: { id: number; text: string }[] = await mRes.json();
+
+        const sections: { id: number; text: string }[] = await sectionsRes.json();
+        const marks: { id: number; text: string }[] = await marksRes.json();
 
         const sMap: SectionMap = {};
         sections.forEach(s => (sMap[s.text] = s.id));
@@ -77,17 +79,18 @@ export const EditingHardSkillsComponent: React.FC<Props> = ({
         setLoading(false);
       }
     }
-    load();
+    loadMappings();
   }, [fetchApi]);
 
   if (loading) {
     return <CircularProgress />;
   }
 
-  const hardKey = Object.keys(configData).find(k =>
-    k.toLowerCase().includes('hard'),
+  const hardSkillsCategory = Object.keys(configData).find(
+    key => key.toLowerCase().includes('hard')
   );
-  const hardArray: Skill[] = hardKey ? configData[hardKey] : [];
+
+  if (loading) return <CircularProgress />;
 
   return (
     <>
@@ -98,8 +101,9 @@ export const EditingHardSkillsComponent: React.FC<Props> = ({
           ratings based on demonstrated expertise and practical implementation.
         </p>
       </div>
+
       <div className={classes.grid}>
-        {hardArray.map(skill => (
+        {(configData[hardSkillsCategory || ''] || []).map(skill => (
           <AssessmentHardSkillsSection
             key={skill.title}
             assessmentId={assessmentId}

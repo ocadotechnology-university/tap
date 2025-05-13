@@ -86,11 +86,14 @@ export const AssessmentHardSkillsSection: React.FC<Props> = ({
             return;
         }
 
-        await fetchApi.fetch('http://localhost:7007/api/team-assessment/setHardSkillMark', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ assessmentId, questionId, markId }),
-        });
+        await fetchApi.fetch(
+            'http://localhost:7007/api/team-assessment/setHardSkillMark',
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ assessmentId, questionId, markId }),
+            },
+        );
     };
 
     return (
