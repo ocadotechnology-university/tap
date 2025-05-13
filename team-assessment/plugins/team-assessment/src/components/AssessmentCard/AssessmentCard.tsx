@@ -110,7 +110,6 @@ export const AssessmentCard = ({
           <Button
             onClick={() => {
               onCreateAssessment?.();
-              onStartEditing?.();
             }}
             variant="contained"
             color="primary"

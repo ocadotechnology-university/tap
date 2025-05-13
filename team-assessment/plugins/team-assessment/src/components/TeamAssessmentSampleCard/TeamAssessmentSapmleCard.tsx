@@ -41,11 +41,12 @@ export const TeamAssessmentSampleCard: React.FC<TeamAssessmentSampleCardProps> =
           body: JSON.stringify({ targetUser, teamId }),
         },
       );
-
+  
       const data = await response.json();
-      console.log('\n\n\nAssessment created:', data);
-
+      console.log('Assessment created:', data);
+  
       if (onStartEditing && data?.id) {
+        console.log('Calling onStartEditing with id:', data.id);
         onStartEditing(Number(data.id));
       }
     } catch (err) {

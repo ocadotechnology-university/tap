@@ -28,10 +28,19 @@ const useStyles = makeStyles({
 export const MainPageComponent = () => {
   const classes = useStyles();
   const [isEditingAssessment, setIsEditingAssessment] = useState(false);
+  const [editingAssessmentId, setEditingAssessmentId] = useState<number | null>(null);
   const [configData, setConfigData] = useState<Record<string, { title: string, labels: string[] }[]> | null>(null);
 
-  const startEditing = () => setIsEditingAssessment(true);
-  const stopEditing = () => setIsEditingAssessment(false);
+  const startEditing = (id: number) => {
+    console.log("Получен ID для редактирования:", id);
+    setEditingAssessmentId(id);
+    setIsEditingAssessment(true);
+  };
+
+  const stopEditing = () => {
+    setIsEditingAssessment(false);
+    setEditingAssessmentId(null);
+  };
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -48,22 +57,26 @@ export const MainPageComponent = () => {
     fetchConfig();
   }, []);
 
-  if (isEditingAssessment) {
-    if (!configData) {
-      return <div>Loading...</div>;
-    }
-    return (
-      <EditingAssessmentComponent configData={configData} onBackToMain={stopEditing} />
-    );
-  }
-
-
   return (
     <Page themeId="tool">
-      <Header title="Team Assessment Plugin"></Header>
+      <Header title="Team Assessment Plugin" />
       <Content className={classes.content}>
-        <TeamAssessmentSampleCard onStartEditing={startEditing} />
-        <MyAssessmentsComponent />
+        {isEditingAssessment && editingAssessmentId !== null ? (
+          configData ? (
+            <EditingAssessmentComponent
+              assessmentId={editingAssessmentId}
+              configData={configData}
+              onBackToMain={stopEditing}
+            />
+          ) : (
+            <div>Loading...</div>
+          )
+        ) : (
+          <>
+            <TeamAssessmentSampleCard onStartEditing={startEditing} />
+            <MyAssessmentsComponent />
+          </>
+        )}
       </Content>
     </Page>
   );
