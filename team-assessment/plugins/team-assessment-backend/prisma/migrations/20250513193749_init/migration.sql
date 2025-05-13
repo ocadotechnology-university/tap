@@ -95,7 +95,7 @@ CREATE UNIQUE INDEX "SoftSkillsMarks_Text_key" ON "SoftSkillsMarks"("Text");
 CREATE UNIQUE INDEX "SoftSkillsTable_KEY_key" ON "SoftSkillsTable"("KEY");
 
 -- AddForeignKey
-ALTER TABLE "HardSkills" ADD CONSTRAINT "HardSkills_Assessment_ID_fkey" FOREIGN KEY ("Assessment_ID") REFERENCES "Assessments"("Assessment_ID") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "HardSkills" ADD CONSTRAINT "HardSkills_Assessment_ID_fkey" FOREIGN KEY ("Assessment_ID") REFERENCES "Assessments"("Assessment_ID") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "HardSkills" ADD CONSTRAINT "HardSkills_Question_ID_fkey" FOREIGN KEY ("Question_ID") REFERENCES "HardSkillsSections"("Question_ID") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -107,7 +107,7 @@ ALTER TABLE "HardSkills" ADD CONSTRAINT "HardSkills_Mark_ID_fkey" FOREIGN KEY ("
 ALTER TABLE "Competencies" ADD CONSTRAINT "Competencies_Area_ID_fkey" FOREIGN KEY ("Area_ID") REFERENCES "Areas"("Area_ID") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SoftSkillsTable" ADD CONSTRAINT "SoftSkillsTable_Assessment_ID_fkey" FOREIGN KEY ("Assessment_ID") REFERENCES "Assessments"("Assessment_ID") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "SoftSkillsTable" ADD CONSTRAINT "SoftSkillsTable_Assessment_ID_fkey" FOREIGN KEY ("Assessment_ID") REFERENCES "Assessments"("Assessment_ID") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "SoftSkillsTable" ADD CONSTRAINT "SoftSkillsTable_Area_ID_fkey" FOREIGN KEY ("Area_ID") REFERENCES "Areas"("Area_ID") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -116,7 +116,7 @@ ALTER TABLE "SoftSkillsTable" ADD CONSTRAINT "SoftSkillsTable_Area_ID_fkey" FORE
 ALTER TABLE "SoftSkillsTable" ADD CONSTRAINT "SoftSkillsTable_Area_ID_Competency_ID_fkey" FOREIGN KEY ("Area_ID", "Competency_ID") REFERENCES "Competencies"("Area_ID", "Competency_ID") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Comments" ADD CONSTRAINT "Comments_KEY_fkey" FOREIGN KEY ("KEY") REFERENCES "SoftSkillsTable"("KEY") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Comments" ADD CONSTRAINT "Comments_KEY_fkey" FOREIGN KEY ("KEY") REFERENCES "SoftSkillsTable"("KEY") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Comments" ADD CONSTRAINT "Comments_Mark_ID_fkey" FOREIGN KEY ("Mark_ID") REFERENCES "SoftSkillsMarks"("Mark_ID") ON DELETE RESTRICT ON UPDATE CASCADE;

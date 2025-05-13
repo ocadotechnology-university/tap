@@ -44,7 +44,7 @@ model HardSkill {
   questionId   Int @map("Question_ID")
   markId       Int @map("Mark_ID")
 
-  assessment Assessment        @relation(fields: [assessmentId], references: [id])
+  assessment Assessment        @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
   section    HardSkillsSection @relation(fields: [questionId], references: [id])
   mark       HardSkillsMark    @relation(fields: [markId], references: [id])
 
@@ -89,7 +89,8 @@ model SoftSkillsTable {
   competencyId Int @map("Competency_ID")
   key          Int @unique @default(dbgenerated()) @map("KEY")
 
-  assessment Assessment @relation(fields: [assessmentId], references: [id])
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
   area       Area       @relation(fields: [areaId], references: [id])
   competency Competency @relation(fields: [areaId, competencyId], references: [areaId, competencyId])
   comments   Comment[]
@@ -104,7 +105,7 @@ model Comment {
   markId      Int    @map("Mark_ID")
   commentText String @map("Comment")
 
-  softSkill SoftSkillsTable @relation(fields: [key], references: [key])
+  softSkill SoftSkillsTable @relation(fields: [key], references: [key], onDelete: Cascade)
   mark      SoftSkillsMark  @relation(fields: [markId], references: [id])
 
   @@map("Comments")
