@@ -32,7 +32,6 @@ export const MainPageComponent = () => {
   const [configData, setConfigData] = useState<Record<string, { title: string, labels: string[] }[]> | null>(null);
 
   const startEditing = (id: number) => {
-    console.log("Получен ID для редактирования:", id);
     setEditingAssessmentId(id);
     setIsEditingAssessment(true);
   };
@@ -59,7 +58,6 @@ export const MainPageComponent = () => {
 
   return (
     <Page themeId="tool">
-      <Header title="Team Assessment Plugin" />
       <Content className={classes.content}>
         {isEditingAssessment && editingAssessmentId !== null ? (
           configData ? (

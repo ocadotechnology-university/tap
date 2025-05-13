@@ -1,4 +1,14 @@
-// team-assessment/plugins/team-assessment-backend/src/utils/loadAssessmentConfig.ts
+/*  team-assessment backend ─ utils/loadAssessmentConfig.ts
+    -------------------------------------------------------
+    Loads assessment‑config.yaml and synchronises its contents
+    with the PostgreSQL database through Prisma ORM.
+
+    Features added in this version
+    ──────────────────────────────
+    • fullSync flag – when true deletes anything missing from YAML
+    • Runs every data‑changing operation inside a single transaction
+    • Splits logic into small, clearly‑named helpers for readability
+*/
 
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
@@ -7,36 +17,32 @@ import yaml from 'js-yaml';
 
 const prisma = new PrismaClient();
 
-interface SoftSectionConfig {
+/** Shape of one soft‑skill entry inside the YAML file */
+interface SoftItem {
     area: string;
     title: string;
     labels: string[];
 }
 
-interface HardSectionConfig {
+/** Shape of one hard‑skill entry inside the YAML file */
+interface HardItem {
     title: string;
     labels: string[];
 }
 
+/** Options accepted by the loader */
+type LoaderOptions = {
+    /** When true -> delete DB records that disappeared from YAML */
+    fullSync?: boolean;
+    /** Optional logger injected from Backstage env */
+    logger?: { info: (...a: any[]) => void; error: (...a: any[]) => void };
+};
+
 /**
- * !!! IMPORTANT TO READ !!!
- * Reads 'assessment-config.yaml' from the app's public directory,
- * parses both "Soft Skills" and "Hard Skills" sections, and:
- *
- * Soft Skills:
- *   1. Inserts any new Areas into the 'Areas' table.
- *   2. Inserts any new Competencies (scoped by area) into 'Competencies' with auto-assigned IDs.
- *   3. Inserts any new labels into 'SoftSkillsMarks'.
- *
- * Hard Skills:
- *   1. Inserts any new section titles into 'HardSkillsSections'.
- *   2. Inserts any new labels into 'HardSkillsMarks'.
- *
- * All operations use bulk 'createMany' with 'skipDuplicates' to minimize
- * round-trips and speed up startup.
+ * Parse YAML and return typed arrays.
+ * Throws if file is missing or malformed.
  */
-export async function loadAssessmentConfig(): Promise<void> {
-    // Locate the YAML file
+function readYaml(): { soft: SoftItem[]; hard: HardItem[] } {
     const filePath = path.join(
         process.cwd(),
         '..',
@@ -45,113 +51,149 @@ export async function loadAssessmentConfig(): Promise<void> {
         'assessment-config.yaml',
     );
 
-    let rawDoc: any;
-    try {
-        rawDoc = yaml.load(fs.readFileSync(filePath, 'utf8'));
-        console.log('>>> Loaded config:', JSON.stringify(rawDoc, null, 2));
-    } catch (error) {
-        console.error('\nFailed to load or parse assessment-config.yaml:', error);
-        return;
-    }
+    const raw = yaml.load(fs.readFileSync(filePath, 'utf8')) as Record<
+        string,
+        any
+    >;
 
-    //
-    // === SOFT SKILLS SYNC ===
-    //
-    const softSections: SoftSectionConfig[] = Array.isArray(rawDoc['Soft Skills'])
-        ? rawDoc['Soft Skills']
-        : [];
+    const soft = Array.isArray(raw['Soft Skills']) ? (raw['Soft Skills'] as SoftItem[]) : [];
+    const hard = Array.isArray(raw['Hard Skills']) ? (raw['Hard Skills'] as HardItem[]) : [];
 
-    if (softSections.length > 0) {
-        // 1) Collect unique areas, titles and labels
-        const areas = Array.from(new Set(softSections.map(s => s.area)));
-        const labels = Array.from(new Set(softSections.flatMap(s => s.labels)));
-        const pairs = softSections.map(s => ({ area: s.area, title: s.title }));
+    return { soft, hard };
+}
 
-        // 2) Fetch current DB state
-        const existingAreas = await prisma.area.findMany({ select: { id: true, text: true } });
-        const existingMarks = await prisma.softSkillsMark.findMany({ select: { text: true } });
-        const existingComps = await prisma.competency.findMany({
-            select: { areaId: true, competencyId: true, text: true },
+/** Public entry point used by the plugin */
+export async function loadAssessmentConfig(opts: LoaderOptions = {}): Promise<void> {
+    const { fullSync = false, logger = console } = opts;
+
+    const { soft, hard } = readYaml();
+
+    // Pre‑compute YAML‑derived sets for quick look‑ups
+    const areaSet = new Set(soft.map(s => s.area));
+    const softLabelsSet = new Set(soft.flatMap(s => s.labels));
+    const pairsSet = new Set(soft.map(s => `${s.area}:::${s.title}`)); // area:::title
+
+    const hardSectionSet = new Set(hard.map(h => h.title));
+    const hardLabelsSet = new Set(hard.flatMap(h => h.labels));
+
+    await prisma.$transaction(async tx => {
+        // ──────────────────── Soft Skills ────────────────────
+        //
+        // 1) SoftSkillsMark ----------------------------------------------------------
+        const dbSoftMarks = await tx.softSkillsMark.findMany({ select: { text: true } });
+
+        // Delete marks missing from YAML (if fullSync enabled)
+        if (fullSync) {
+            await tx.softSkillsMark.deleteMany({
+                where: { text: { notIn: Array.from(softLabelsSet) } },
+            });
+        }
+        // Insert new marks
+        const newSoftMarks = [...softLabelsSet].filter(
+            t => !dbSoftMarks.some(m => m.text === t),
+        );
+        if (newSoftMarks.length) {
+            await tx.softSkillsMark.createMany({
+                data: newSoftMarks.map(text => ({ text })),
+                skipDuplicates: true,
+            });
+        }
+
+        // 2) Area --------------------------------------------------------------------
+        const dbAreas = await tx.area.findMany({ select: { id: true, text: true } });
+        if (fullSync) {
+            await tx.area.deleteMany({
+                where: { text: { notIn: Array.from(areaSet) } },
+            });
+        }
+        const newAreas = [...areaSet].filter(a => !dbAreas.some(d => d.text === a));
+        if (newAreas.length) {
+            await tx.area.createMany({ data: newAreas.map(text => ({ text })) });
+        }
+
+        // 3) Competency --------------------------------------------------------------
+        // Reload areas to get ids in case we just inserted some
+        const areaMap = new Map(
+            (await tx.area.findMany({ select: { id: true, text: true } })).map(a => [
+                a.text,
+                a.id,
+            ]),
+        );
+
+        const dbComps = await tx.competency.findMany({
+            select: { areaId: true, competencyId: true, text: true, area: true },
         });
 
-        // 3) Insert new Areas
-        const newAreas = areas
-            .filter(a => !existingAreas.some(x => x.text === a))
-            .map(text => ({ text }));
-        if (newAreas.length > 0) {
-            await prisma.area.createMany({ data: newAreas, skipDuplicates: true });
+        if (fullSync) {
+            // Delete competencies not present in YAML
+            await tx.competency.deleteMany({
+                where: {
+                    NOT: {
+                        OR: [...pairsSet].map(p => {
+                            const [area, title] = p.split(':::');
+                            return { text: title, area: { text: area } };
+                        }),
+                    },
+                },
+            });
         }
 
-        // 4) Insert new Marks
-        const newMarks = labels
-            .filter(l => !existingMarks.some(x => x.text === l))
-            .map(text => ({ text }));
-        if (newMarks.length > 0) {
-            await prisma.softSkillsMark.createMany({ data: newMarks, skipDuplicates: true });
+        // Compute max competencyId per area to keep numeric sequence
+        const maxIdPerArea = new Map<number, number>();
+        for (const c of dbComps) {
+            maxIdPerArea.set(
+                c.areaId,
+                Math.max(maxIdPerArea.get(c.areaId) ?? 0, c.competencyId),
+            );
         }
 
-        // 5) Reload Areas to get IDs
-        const allAreas = await prisma.area.findMany({ select: { id: true, text: true } });
-        const areaMap = new Map(allAreas.map(a => [a.text, a.id]));
-
-        // 6) Compute next competencyId per area
-        const maxMap = new Map<number, number>();
-        for (const c of existingComps) {
-            maxMap.set(c.areaId, Math.max(maxMap.get(c.areaId) ?? 0, c.competencyId));
-        }
-
-        // 7) Prepare new Competencies
-        const newComps: { areaId: number; competencyId: number; text: string }[] = [];
-        for (const { area, title } of pairs) {
+        // Insert newly seen competencies
+        const newComps = soft.flatMap(({ area, title }) => {
             const aid = areaMap.get(area)!;
-            if (!existingComps.some(c => c.areaId === aid && c.text === title)) {
-                const nextId = (maxMap.get(aid) ?? 0) + 1;
-                maxMap.set(aid, nextId);
-                newComps.push({ areaId: aid, competencyId: nextId, text: title });
-            }
+            const exists = dbComps.some(c => c.areaId === aid && c.text === title);
+            if (exists) return [];
+            const nextId = (maxIdPerArea.get(aid) ?? 0) + 1;
+            maxIdPerArea.set(aid, nextId);
+            return [{ areaId: aid, competencyId: nextId, text: title }];
+        });
+        if (newComps.length) {
+            await tx.competency.createMany({ data: newComps, skipDuplicates: true });
         }
 
-        if (newComps.length > 0) {
-            await prisma.competency.createMany({ data: newComps, skipDuplicates: true });
+        // ──────────────────── Hard Skills ────────────────────
+        //
+        const dbHardMarks = await tx.hardSkillsMark.findMany({ select: { text: true } });
+        const dbHardSecs = await tx.hardSkillsSection.findMany({ select: { text: true } });
+
+        if (fullSync) {
+            await tx.hardSkillsMark.deleteMany({
+                where: { text: { notIn: Array.from(hardLabelsSet) } },
+            });
+            await tx.hardSkillsSection.deleteMany({
+                where: { text: { notIn: Array.from(hardSectionSet) } },
+            });
         }
 
-        console.log(`\nSoft Skills synchronized (${areas.length} areas, ${labels.length} marks, ${newComps.length} competencies).\n`);
-    }
-
-    //
-    // === HARD SKILLS SYNC ===
-    //
-    const hardSections: HardSectionConfig[] = Array.isArray(rawDoc['Hard Skills'])
-        ? rawDoc['Hard Skills']
-        : [];
-
-    if (hardSections.length > 0) {
-        // 1) Collect unique titles and labels
-        const titles = Array.from(new Set(hardSections.map(h => h.title)));
-        const hardLabels = Array.from(new Set(hardSections.flatMap(h => h.labels)));
-
-        // 2) Fetch current DB state
-        const existingSecs = await prisma.hardSkillsSection.findMany({ select: { text: true } });
-        const existingHMarks = await prisma.hardSkillsMark.findMany({ select: { text: true } });
-
-        // 3) Insert new Sections
-        const newSecs = titles
-            .filter(t => !existingSecs.some(x => x.text === t))
-            .map(text => ({ text }));
-        if (newSecs.length > 0) {
-            await prisma.hardSkillsSection.createMany({ data: newSecs, skipDuplicates: true });
+        const newHardMarks = [...hardLabelsSet].filter(
+            l => !dbHardMarks.some(m => m.text === l),
+        );
+        if (newHardMarks.length) {
+            await tx.hardSkillsMark.createMany({
+                data: newHardMarks.map(text => ({ text })),
+                skipDuplicates: true,
+            });
         }
 
-        // 4) Insert new HardSkillsMarks
-        const newHMarks = hardLabels
-            .filter(l => !existingHMarks.some(x => x.text === l))
-            .map(text => ({ text }));
-        if (newHMarks.length > 0) {
-            await prisma.hardSkillsMark.createMany({ data: newHMarks, skipDuplicates: true });
+        const newHardSecs = [...hardSectionSet].filter(
+            s => !dbHardSecs.some(db => db.text === s),
+        );
+        if (newHardSecs.length) {
+            await tx.hardSkillsSection.createMany({
+                data: newHardSecs.map(text => ({ text })),
+                skipDuplicates: true,
+            });
         }
+    });
 
-        console.log(`\nHard Skills synchronized (${titles.length} sections, ${hardLabels.length} marks).\n`);
-    }
-
-    console.log('\nassessment-config.yaml fully synchronized to database\n');
+    logger.info(`assessment-config.yaml synchronised (fullSync=${fullSync})`);
 }

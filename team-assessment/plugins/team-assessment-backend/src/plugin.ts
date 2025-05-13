@@ -1,19 +1,21 @@
-// team-assessment/plugins/team-assessment-backend/src/plugin.ts
+/*  team-assessment backend ─ plugin.ts
+    -----------------------------------
+    Registers the Backstage backend plugin AND adds a file‑watcher
+    so that editing assessment-config.yaml triggers live DB sync.
+*/
 
 import {
   coreServices,
   createBackendPlugin,
 } from '@backstage/backend-plugin-api';
-import { createRouter } from './router';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
+import { createRouter } from './router';
 import { createAssessmentListService } from './services/TodoListService/createAssessmentListService';
 import { loadAssessmentConfig } from './utils/loadAssessmentConfig';
 
-/**
- * The team-assessment backend plugin
- *
- * @public
- */
+import chokidar from 'chokidar'; // <── file‑system watcher
+import path from 'path';
+
 export const teamAssessmentBackendPlugin = createBackendPlugin({
   pluginId: 'team-assessment',
   register(env) {
@@ -26,10 +28,16 @@ export const teamAssessmentBackendPlugin = createBackendPlugin({
         catalog: catalogServiceRef,
       },
       async init({ logger, auth, httpAuth, httpRouter, catalog }) {
-        loadAssessmentConfig()
-          .then(() => logger.info('Config sync completed'))
-          .catch(err => logger.error('Config sync failed', err));
+        // -----------------------------------------------------------------------
+        // 1) Initial load of YAML → DB on plugin startup
+        // -----------------------------------------------------------------------
+        await loadAssessmentConfig({ fullSync: true, logger }).catch(err =>
+          logger.error('Initial config sync failed', err),
+        );
 
+        // -----------------------------------------------------------------------
+        // 2) Create service + router (unchanged application logic)
+        // -----------------------------------------------------------------------
         const teamAssessmentListService = await createAssessmentListService({
           logger,
           auth,
@@ -43,6 +51,33 @@ export const teamAssessmentBackendPlugin = createBackendPlugin({
           }),
         );
 
+        // -----------------------------------------------------------------------
+        // 3) Watch assessment-config.yaml for live edits
+        // -----------------------------------------------------------------------
+        const cfgPath = path.join(
+          process.cwd(),
+          '..',
+          'app',
+          'public',
+          'assessment-config.yaml',
+        );
+
+        chokidar
+          .watch(cfgPath, {
+            ignoreInitial: true,       // We already loaded once above
+            awaitWriteFinish: {
+              stabilityThreshold: 500, // ms to wait for the editor to finish
+            },
+          })
+          .on('change', async () => {
+            logger.info('assessment-config.yaml changed – syncing to DB…');
+            try {
+              await loadAssessmentConfig({ fullSync: true, logger });
+              logger.info('YAML sync completed successfully');
+            } catch (err) {
+              logger.error('YAML sync failed');
+            }
+          });
       },
     });
   },
