@@ -1,3 +1,5 @@
+// plugins/team-assessment-backend/src/services/TodoListService/createAssessmentListService/types.ts
+
 import {
   BackstageCredentials,
   BackstageUserPrincipal,
@@ -17,11 +19,18 @@ export interface HardSkill {
   markId: number;
 }
 
+export interface SectionRow {
+  id: number;
+  text: string;
+}
+export interface MarkRow {
+  id: number;
+  text: string;
+}
+
 export interface TeamAssessmentListService {
   createAssessment(
-    options: {
-      credentials: BackstageCredentials<BackstageUserPrincipal>;
-    },
+    options: { credentials: BackstageCredentials<BackstageUserPrincipal> },
     targetUser: string,
     groupId: string
   ): Promise<Assessment>;
@@ -30,21 +39,28 @@ export interface TeamAssessmentListService {
     options: { credentials: BackstageCredentials<BackstageUserPrincipal> },
     assessmentId: number,
     questionId: number,
-    markId: number,
+    markId: number
   ): Promise<HardSkill>;
 
-  getAssessments(options: {
-    credentials: BackstageCredentials<BackstageUserPrincipal>;
-  }, teamId: string): Promise<string[]>;
+  getHardSkillSections(
+    options: { credentials: BackstageCredentials<BackstageUserPrincipal> }
+  ): Promise<SectionRow[]>;
 
-  getSampleText(options: {
-    credentials: BackstageCredentials<BackstageUserPrincipal>;
-  }): Promise<{ message: string }>;
+  getHardSkillMarks(
+    options: { credentials: BackstageCredentials<BackstageUserPrincipal> }
+  ): Promise<MarkRow[]>;
+
+  getAssessments(
+    options: { credentials: BackstageCredentials<BackstageUserPrincipal> },
+    teamId: string
+  ): Promise<string[]>;
+
+  getSampleText(
+    options: { credentials: BackstageCredentials<BackstageUserPrincipal> }
+  ): Promise<{ message: string }>;
 
   addComment(
-    options: {
-      credentials: BackstageCredentials<BackstageUserPrincipal>;
-    },
+    options: { credentials: BackstageCredentials<BackstageUserPrincipal> },
     key: number,
     markId: number,
     commentText: string

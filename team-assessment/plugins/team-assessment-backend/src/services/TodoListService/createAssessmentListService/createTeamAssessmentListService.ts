@@ -1,8 +1,14 @@
 import { AuthService, LoggerService } from '@backstage/backend-plugin-api';
 import { NotFoundError } from '@backstage/errors';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
-// import crypto from 'node:crypto';
-import { Assessment, TeamAssessmentListService, HardSkill } from './types';
+import crypto from 'node:crypto';
+import {
+  Assessment,
+  TeamAssessmentListService,
+  HardSkill,
+  SectionRow,
+  MarkRow,
+} from './types';
 import prisma from '../../../prismaClient'
 
 // TEMPLATE NOTE:
@@ -43,29 +49,31 @@ export async function createAssessmentListService({
 
     async upsertHardSkill(options, assessmentId, questionId, markId) {
       const createdBy = options.credentials.principal.userEntityRef;
+      await prisma.hardSkill.upsert({
+        where: { assessmentId_questionId: { assessmentId, questionId } },
+        update: { markId },
+        create: { assessmentId, questionId, markId },
+      })
+      logger.info('Created new hardSkillMark by', { createdBy });
+      return { assessmentId, questionId, markId } as HardSkill
+    },
 
-      const hardSkill = await prisma.hardSkill.upsert({
-        where: {
-          assessmentId_questionId: { assessmentId, questionId },
-        },
-        update: {
-          markId,
-        },
-        create: {
-          assessmentId,
-          questionId,
-          markId,
-        },
+    async getHardSkillSections(options) {
+      const createdBy = options.credentials.principal.userEntityRef;
+      const rows = await prisma.hardSkillsSection.findMany({
+        select: { id: true, text: true },
       });
+      logger.info('Created new getHardSkillSections by', { createdBy });
+      return rows as SectionRow[];
+    },
 
-      logger.info('Upsert hard skill', {
-        createdBy,
-        assessmentId,
-        questionId,
-        markId,
+    async getHardSkillMarks(options) {
+      const createdBy = options.credentials.principal.userEntityRef;
+      const rows = await prisma.hardSkillsMark.findMany({
+        select: { id: true, text: true },
       });
-
-      return hardSkill as HardSkill;
+      logger.info('Created new getHardSkillSections by', { createdBy });
+      return rows as MarkRow[];
     },
 
 

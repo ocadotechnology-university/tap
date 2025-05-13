@@ -4,6 +4,7 @@ import { z } from 'zod';
 import express from 'express';
 import Router from 'express-promise-router';
 import { TeamAssessmentListService } from './services/TodoListService/createAssessmentListService/types';
+import prisma from './prismaClient'
 
 export async function createRouter({
   httpAuth,
@@ -47,6 +48,20 @@ export async function createRouter({
     );
 
     res.status(201).json(result);
+  });
+
+  router.get('/hardSkillSections', async (req, res) => {
+    const sections = await teamAssessmentListService.getHardSkillSections(
+      { credentials: await httpAuth.credentials(req, { allow: ['user'] }) },
+    );
+    res.status(200).json(sections);
+  });
+
+  router.get('/hardSkillMarks', async (req, res) => {
+    const marks = await teamAssessmentListService.getHardSkillMarks(
+      { credentials: await httpAuth.credentials(req, { allow: ['user'] }) },
+    );
+    res.status(200).json(marks);
   });
 
   router.post('/addComment', async (req, res) => {

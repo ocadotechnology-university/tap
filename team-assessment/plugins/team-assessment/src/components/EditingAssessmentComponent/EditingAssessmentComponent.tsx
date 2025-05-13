@@ -6,6 +6,7 @@ import { EditingSoftSkillsComponent } from '../EditingSoftSkillsComponent/Editin
 import { EditingHardSkillsComponent } from '../EditingHardSkillsComponent/EditingHardSkillsComponent';
 
 export type Skill = {
+  id?: number;
   area?: string;
   title: string;
   description: string;
@@ -13,6 +14,7 @@ export type Skill = {
 };
 
 type Props = {
+  assessmentId: number;
   configData: Record<string, Skill[]>;
   onBackToMain: () => void;
 };
@@ -20,11 +22,7 @@ type Props = {
 type Answers = Record<string, string>;
 
 const useStyles = makeStyles((theme: Theme) => ({
-  rootContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    minHeight: '100vh',
-  },
+  rootContainer: { display: 'flex', flexDirection: 'column', minHeight: '100vh' },
   content: {
     flex: 1,
     padding: 0,
@@ -33,7 +31,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(2),
-
   },
   bottomNav: {
     width: '100%',
@@ -44,7 +41,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: 'center',
     gap: theme.spacing(2),
     padding: theme.spacing(3),
-    backgroundColor: 'transparent', // Убрали фон
+    backgroundColor: 'transparent',
     marginTop: 'auto',
   },
   navButton: {
@@ -53,31 +50,26 @@ const useStyles = makeStyles((theme: Theme) => ({
     padding: theme.spacing(1.5, 3),
     fontWeight: 600,
     transition: 'all 0.3s ease',
-    '&:hover': {
-      transform: 'translateY(-2px)',
-      boxShadow: theme.shadows[4],
-    },
-    '&.MuiButton-contained': {
-      color: theme.palette.common.white,
-    },
+    '&:hover': { transform: 'translateY(-2px)', boxShadow: theme.shadows[4] },
+    '&.MuiButton-contained': { color: theme.palette.common.white },
   },
 }));
 
 export const EditingAssessmentComponent: React.FC<Props> = ({
+  assessmentId,
   configData,
   onBackToMain,
 }) => {
   const classes = useStyles();
   const theme = useTheme();
-  const [currentStage, setCurrentStage] = useState<'softSkills' | 'hardSkills'>('softSkills');
-  const [hardSkillsAnswers, setHardSkillsAnswers] = useState<Answers>({});
+  const [stage, setStage] = useState<'soft' | 'hard'>('soft');
+  const [answers, setAnswers] = useState<Answers>({});
 
-  const handleAnswerChange = (skillTitle: string, answer: string) => {
-    setHardSkillsAnswers(prev => ({ ...prev, [skillTitle]: answer }));
-  };
+  const handleAnswerChange = (title: string, answer: string) =>
+    setAnswers(prev => ({ ...prev, [title]: answer }));
 
   const handleSubmit = () => {
-    console.log('Submitted answers:', hardSkillsAnswers);
+    console.log('Submitted answers:', answers);
     onBackToMain();
   };
 
@@ -86,13 +78,13 @@ export const EditingAssessmentComponent: React.FC<Props> = ({
       <Header title="Assessment Editing" />
       <div className={classes.rootContainer}>
         <Content className={classes.content}>
-          {currentStage === 'softSkills' && (
+          {stage === 'soft' ? (
             <EditingSoftSkillsComponent configData={configData} />
-          )}
-          {currentStage === 'hardSkills' && (
+          ) : (
             <EditingHardSkillsComponent
+              assessmentId={assessmentId}
               configData={configData}
-              answers={hardSkillsAnswers}
+              answers={answers}
               onAnswerChange={handleAnswerChange}
             />
           )}
@@ -100,59 +92,32 @@ export const EditingAssessmentComponent: React.FC<Props> = ({
 
         <div className={classes.bottomNav}>
           <Button
-            onClick={() => setCurrentStage(prev =>
-              prev === 'softSkills' ? 'hardSkills' : 'softSkills'
-            )}
+            onClick={() => setStage(prev => (prev === 'soft' ? 'hard' : 'soft'))}
             variant="contained"
             className={classes.navButton}
-            style={{
-              backgroundColor: '#2196F3',
-              backgroundImage: 'none',
-            }}
+            style={{ backgroundColor: '#2196F3' }}
           >
-            {currentStage === 'softSkills' ? 'Hard Skills →' : '← Soft Skills'}
+            {stage === 'soft' ? 'Hard Skills →' : '← Soft Skills'}
           </Button>
 
-          <Divider
-            orientation="vertical"
-            flexItem
-            style={{
-              backgroundColor: 'rgba(0,0,0,0.1)',
-              height: 24,
-              margin: theme.spacing(0, 1),
-            }}
-          />
+          <Divider orientation="vertical" flexItem style={{ backgroundColor: 'rgba(0,0,0,0.1)', height: 24, margin: theme.spacing(0, 1) }} />
 
           <Button
             onClick={onBackToMain}
             variant="contained"
             className={classes.navButton}
-            style={{
-              backgroundColor: '#FF4081',
-              backgroundImage: 'none',
-            }}
+            style={{ backgroundColor: '#FF4081' }}
           >
             Back to Main
           </Button>
 
-          <Divider
-            orientation="vertical"
-            flexItem
-            style={{
-              backgroundColor: 'rgba(0,0,0,0.1)',
-              height: 24,
-              margin: theme.spacing(0, 1),
-            }}
-          />
+          <Divider orientation="vertical" flexItem style={{ backgroundColor: 'rgba(0,0,0,0.1)', height: 24, margin: theme.spacing(0, 1) }} />
 
           <Button
             onClick={handleSubmit}
             variant="contained"
             className={classes.navButton}
-            style={{
-              backgroundColor: '#4CAF50',
-              backgroundImage: 'none',
-            }}
+            style={{ backgroundColor: '#4CAF50' }}
           >
             Submit
           </Button>
@@ -161,139 +126,3 @@ export const EditingAssessmentComponent: React.FC<Props> = ({
     </Page>
   );
 };
-
-
-
-
-
-
-// import React, { useState } from 'react';
-// import { Page, Header, Content } from '@backstage/core-components';
-// import { makeStyles, Theme } from '@material-ui/core/styles';
-// import { Button } from '@material-ui/core';
-// import { EditingSoftSkillsComponent } from '../EditingSoftSkillsComponent/EditingSoftSkillsComponent';
-// import { EditingHardSkillsComponent } from '../EditingHardSkillsComponent/EditingHardSkillsComponent';
-
-// export type Skill = {
-//   area?: string;
-//   title: string;
-//   description: string;
-//   labels: string[];
-// };
-
-// type Props = {
-//   configData: Record<string, Skill[]>;
-//   onBackToMain: () => void;
-// };
-
-// type Answers = Record<string, string>;
-
-// const useStyles = makeStyles((theme: Theme) => ({
-//   content: {
-//     padding: 0,
-//     paddingTop: theme.spacing(2),
-//     paddingBottom: theme.spacing(10),
-//     display: 'flex',
-//     flexDirection: 'column',
-//     gap: theme.spacing(2),
-//   },
-//   bottomNav: {
-//     position: 'fixed',
-//     bottom: theme.spacing(3),
-//     right: theme.spacing(84),
-//     display: 'flex',
-//     justifyContent: 'flex-end',
-//     alignItems: 'center',
-//     gap: theme.spacing(1.5),
-//     flexWrap: 'wrap',
-//     zIndex: 1000,
-//   },
-//   navButton: {
-//     flex: '0 1 auto',
-//     minWidth: 96,
-//     borderRadius: 20,
-//     textTransform: 'none',
-//     fontSize: '0.9rem',
-//     padding: theme.spacing(1.5, 2.5),
-//     transition: 'transform 150ms ease, background-color 150ms ease',
-//     '&:hover': {
-//       transform: 'scale(1.05)',
-//       backgroundColor: theme.palette.action.hover,
-//     },
-//     '&:active': {
-//       transform: 'scale(0.98)',
-//     },
-//     color: '#fff',
-//   },
-// }));
-
-// export const EditingAssessmentComponent: React.FC<Props> = ({
-//   configData,
-//   onBackToMain,
-// }) => {
-//   const classes = useStyles();
-//   const [currentStage, setCurrentStage] = useState<'softSkills' | 'hardSkills'>('softSkills');
-//   const [hardSkillsAnswers, setHardSkillsAnswers] = useState<Answers>({});
-
-//   const handleAnswerChange = (skillTitle: string, answer: string) => {
-//     setHardSkillsAnswers(prev => ({ ...prev, [skillTitle]: answer }));
-//   };
-
-//   return (
-//     <Page themeId="tool">
-//       <Header title="Assessment Editing" />
-//       <Content className={classes.content}>
-//         {currentStage === 'softSkills' && (
-//           <EditingSoftSkillsComponent configData={configData} />
-//         )}
-//         {currentStage === 'hardSkills' && (
-//           <EditingHardSkillsComponent
-//             configData={configData}
-//             answers={hardSkillsAnswers}
-//             onAnswerChange={handleAnswerChange}
-//           />
-//         )}
-//       </Content>
-
-//       <div className={classes.bottomNav}>
-//         {currentStage === 'softSkills' ? (
-//           <Button
-//             onClick={() => setCurrentStage('hardSkills')}
-//             variant="contained"
-//             className={classes.navButton}
-//             style={{ backgroundColor: '#8dc6ff' }}
-//           >
-//             Hard Skills
-//           </Button>
-//         ) : (
-//           <Button
-//             onClick={() => setCurrentStage('softSkills')}
-//             variant="contained"
-//             className={classes.navButton}
-//             style={{ backgroundColor: '#8dc6ff' }}
-//           >
-//             Soft Skills
-//           </Button>
-//         )}
-
-//         <Button
-//           onClick={onBackToMain}
-//           variant="contained"
-//           className={classes.navButton}
-//           style={{ backgroundColor: '#ff80bf' }}
-//         >
-//           Back to Main
-//         </Button>
-
-//         <Button
-//           onClick={onBackToMain}
-//           variant="contained"
-//           className={classes.navButton}
-//           style={{ backgroundColor: '#4caf50' }}
-//         >
-//           Submit
-//         </Button>
-//       </div>
-//     </Page>
-//   );
-// };
