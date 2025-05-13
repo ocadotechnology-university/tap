@@ -1,3 +1,4 @@
+/* team-assessment/plugins/team-assessment/src/components/AssessmentSoftSkillsSection/AssessmentSoftSkillsSection.tsx */
 import React, { useState } from 'react';
 import {
   Box,
@@ -31,12 +32,12 @@ const useStyles = makeStyles(theme => ({
   },
   dialogContent: {
     padding: theme.spacing(3),
-    minWidth: '500px',
+    minWidth: 500,
   },
   skillItem: {
     padding: theme.spacing(2),
     border: `1px solid ${theme.palette.divider}`,
-    borderRadius: '4px',
+    borderRadius: 4,
     marginBottom: theme.spacing(2),
   },
   labelContainer: {
@@ -47,19 +48,21 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-interface AssessmentSoftSkillsSectionProps {
-  area: string;
-  sections: Array<{
-    title: string;
-    description: string;
-    labels: string[];
-  }>;
+export interface SoftSkillSection {
+  title: string;
+  description: string;
+  labels: string[];
 }
 
-export const AssessmentSoftSkillsSection = ({
+interface Props {
+  area: string;
+  sections: SoftSkillSection[];
+}
+
+export const AssessmentSoftSkillsSection: React.FC<Props> = ({
   area,
   sections,
-}: AssessmentSoftSkillsSectionProps) => {
+}) => {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
 
@@ -74,28 +77,23 @@ export const AssessmentSoftSkillsSection = ({
         </Box>
       </Box>
 
-      <Dialog
-        open={open}
-        onClose={() => setOpen(false)}
-        maxWidth="md"
-        fullWidth
-      >
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>{area} Skills</DialogTitle>
         <DialogContent className={classes.dialogContent}>
-          {sections.map((section) => (
+          {sections.map(section => (
             <Box key={section.title} className={classes.skillItem}>
               <Typography variant="subtitle1" gutterBottom>
                 {section.title}
               </Typography>
-              <Typography variant="body2" color="textSecondary">
-                {section.description}
-              </Typography>
+              {section.description && (
+                <Typography variant="body2" color="textSecondary">
+                  {section.description}
+                </Typography>
+              )}
+
               <Box className={classes.labelContainer}>
-                {section.labels.map((label) => (
-                  <AddCommentToSoftSkillsSectionMenu
-                    key={label}
-                    label={label}
-                  />
+                {section.labels.map(label => (
+                  <AddCommentToSoftSkillsSectionMenu key={label} label={label} />
                 ))}
               </Box>
             </Box>

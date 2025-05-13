@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core';
 import yaml from 'js-yaml';
-import {
-  Header,
-  Page,
-  Content
-} from '@backstage/core-components';
+import { Header, Page, Content } from '@backstage/core-components';
+
 import { TeamAssessmentSampleCard } from '../TeamAssessmentSampleCard';
 import { MyAssessmentsComponent } from '../MyAssessmentsComponent';
-import { EditingAssessmentComponent } from '../EditingAssessmentComponent';
+import type { Skill } from '../EditingAssessmentComponent/EditingAssessmentComponent';
+import { EditingAssessmentComponent } from '../EditingAssessmentComponent/EditingAssessmentComponent';
 
 
+/**
+ * ---------- Styles ----------
+ */
 const useStyles = makeStyles({
   content: {
-    padding: '0px',
+    padding: 0,
     paddingTop: '1rem',
     display: 'flex',
     flexDirection: 'column',
-    gap: '1rem'
+    gap: '1rem',
   },
   grid: {
     width: '100%',
@@ -25,31 +26,50 @@ const useStyles = makeStyles({
   },
 });
 
+/**
+ * Main landing page.
+ *  – shows the sample card + assessments list;
+ *  – switches to EditingAssessmentComponent when user starts editing.
+ */
 export const MainPageComponent = () => {
   const classes = useStyles();
-  const [isEditingAssessment, setIsEditingAssessment] = useState(false);
-  const [editingAssessmentId, setEditingAssessmentId] = useState<number | null>(null);
-  const [configData, setConfigData] = useState<Record<string, { title: string, labels: string[] }[]> | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [configData, setConfigData] = useState<Record<string, Skill[]> | null>(
+    null,
+  );
 
+  /* ---------- Handlers ---------- */
   const startEditing = (id: number) => {
-    setEditingAssessmentId(id);
-    setIsEditingAssessment(true);
+    setEditingId(id);
+    setIsEditing(true);
   };
 
   const stopEditing = () => {
-    setIsEditingAssessment(false);
-    setEditingAssessmentId(null);
+    setIsEditing(false);
+    setEditingId(null);
   };
 
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const response = await fetch('/assessment-config.yaml');
-        const text = await response.text();
-        const data = yaml.load(text) as Record<string, { title: string, labels: string[] }[]>;
+        const resp = await fetch('/assessment-config.yaml');
+        const text = await resp.text();
+
+        /**
+         * The YAML schema is
+         *   {
+         *     'Soft Skills': [ { area, title, description, labels[] } ],
+         *     'Hard Skills': [ { title, description, labels[] } ]
+         *   }
+         *
+         * Casting to Record<string, Skill[]> is safe as every element has
+         * at least title/description/labels (area is optional for hard skills).
+         */
+        const data = yaml.load(text) as Record<string, Skill[]>;
         setConfigData(data);
-      } catch (error) {
-        console.error("Error while setting configuration:", error);
+      } catch (err) {
+        console.error('Error loading YAML config', err);
       }
     };
 
@@ -59,10 +79,10 @@ export const MainPageComponent = () => {
   return (
     <Page themeId="tool">
       <Content className={classes.content}>
-        {isEditingAssessment && editingAssessmentId !== null ? (
+        {isEditing && editingId !== null ? (
           configData ? (
             <EditingAssessmentComponent
-              assessmentId={editingAssessmentId}
+              assessmentId={editingId}
               configData={configData}
               onBackToMain={stopEditing}
             />
