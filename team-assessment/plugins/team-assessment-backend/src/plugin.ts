@@ -64,9 +64,9 @@ export const teamAssessmentBackendPlugin = createBackendPlugin({
 
         chokidar
           .watch(cfgPath, {
-            ignoreInitial: true,       // We already loaded once above
+            ignoreInitial: true,
             awaitWriteFinish: {
-              stabilityThreshold: 500, // ms to wait for the editor to finish
+              stabilityThreshold: 500,
             },
           })
           .on('change', async () => {

@@ -23,8 +23,15 @@ export interface SectionRow {
   id: number;
   text: string;
 }
+
 export interface MarkRow {
   id: number;
+  text: string;
+}
+
+export interface Competency {
+  areaId: number;
+  competencyId: number;
   text: string;
 }
 
@@ -49,6 +56,18 @@ export interface TeamAssessmentListService {
   getHardSkillMarks(
     options: { credentials: BackstageCredentials<BackstageUserPrincipal> }
   ): Promise<MarkRow[]>;
+
+  getSoftSkillAreas(
+    options: { credentials: BackstageCredentials<BackstageUserPrincipal> }
+  ): Promise<SectionRow[]>;
+
+  getSoftSkillMarks(
+    options: { credentials: BackstageCredentials<BackstageUserPrincipal> }
+  ): Promise<MarkRow[]>;
+
+  getSoftSkillCompetencies(
+    options: { credentials: BackstageCredentials<BackstageUserPrincipal> }
+  ): Promise<Competency[]>;
 
   getAssessments(
     options: { credentials: BackstageCredentials<BackstageUserPrincipal> },

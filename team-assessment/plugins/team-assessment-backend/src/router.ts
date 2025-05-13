@@ -64,6 +64,27 @@ export async function createRouter({
     res.status(200).json(marks);
   });
 
+  router.get('/softSkillAreas', async (req, res) => {
+    const sections = await teamAssessmentListService.getSoftSkillAreas(
+      { credentials: await httpAuth.credentials(req, { allow: ['user'] }) },
+    );
+    res.status(200).json(sections);
+  });
+
+  router.get('/softSkillMarks', async (req, res) => {
+    const marks = await teamAssessmentListService.getSoftSkillMarks(
+      { credentials: await httpAuth.credentials(req, { allow: ['user'] }) },
+    );
+    res.status(200).json(marks);
+  });
+
+  router.get('/softSkillCompetencies', async (req, res) => {
+    const marks = await teamAssessmentListService.getSoftSkillCompetencies(
+      { credentials: await httpAuth.credentials(req, { allow: ['user'] }) },
+    );
+    res.status(200).json(marks);
+  });
+
   router.post('/addComment', async (req, res) => {
     const { key, markId, commentText } = req.body;
 

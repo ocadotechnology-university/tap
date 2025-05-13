@@ -8,6 +8,7 @@ import {
   HardSkill,
   SectionRow,
   MarkRow,
+  Competency
 } from './types';
 import prisma from '../../../prismaClient'
 
@@ -76,6 +77,29 @@ export async function createAssessmentListService({
       return rows as MarkRow[];
     },
 
+    async getSoftSkillAreas(options) {
+      const rows = await prisma.area.findMany({
+        select: { id: true, text: true },
+      });
+
+      return rows as SectionRow[];
+    },
+
+    async getSoftSkillMarks(options) {
+      const rows = await prisma.softSkillsMark.findMany({
+        select: { id: true, text: true },
+      });
+
+      return rows as MarkRow[];
+    },
+
+    async getSoftSkillCompetencies(options) {
+      const rows = await prisma.competency.findMany({
+        select: { areaId: true, competencyId: true, text: true },
+      });
+
+      return rows as Competency[];
+    },
 
     async addComment(options, key, markId, commentText) {
       const createdBy = options.credentials.principal.userEntityRef;
