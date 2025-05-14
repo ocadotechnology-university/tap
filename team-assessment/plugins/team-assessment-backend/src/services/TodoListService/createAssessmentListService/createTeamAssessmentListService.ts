@@ -1,22 +1,17 @@
+/* plugins/team-assessment-backend/src/services/TodoListService/createAssessmentListService/createTeamAssessmentListService.ts */
+
 import { AuthService, LoggerService } from '@backstage/backend-plugin-api';
-import { NotFoundError } from '@backstage/errors';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
-import crypto from 'node:crypto';
+import prisma from '../../../prismaClient';
 import {
   Assessment,
   TeamAssessmentListService,
   HardSkill,
   SectionRow,
   MarkRow,
-  Competency
+  Competency,
 } from './types';
-import prisma from '../../../prismaClient'
 
-// TEMPLATE NOTE:
-// This is a simple in-memory todo list store. It is recommended to use a
-// database to store data in a real application. See the database service
-// documentation for more information on how to do this:
-// https://backstage.io/docs/backend-system/core-services/database
 export async function createAssessmentListService({
   auth,
   logger,
@@ -28,25 +23,15 @@ export async function createAssessmentListService({
 }): Promise<TeamAssessmentListService> {
   logger.info('Initializing AssessmentListService');
 
-  // const storedAssessments = new Array<Assessment>();
-
   return {
     async createAssessment(options, targetUser, teamId) {
       const createdBy = options.credentials.principal.userEntityRef;
-
       const newAssessment = await prisma.assessment.create({
-        data: {
-          createdBy: createdBy,
-          targetUser: targetUser,
-          groupId: teamId
-        }
-      })
-
-      logger.info('Created new assessment by', { createdBy });
-
-      return newAssessment;
+        data: { createdBy, targetUser, groupId: teamId },
+      });
+      logger.info('Created new assessment', { createdBy });
+      return newAssessment as Assessment;
     },
-
 
     async upsertHardSkill(options, assessmentId, questionId, markId) {
       const createdBy = options.credentials.principal.userEntityRef;
@@ -54,84 +39,112 @@ export async function createAssessmentListService({
         where: { assessmentId_questionId: { assessmentId, questionId } },
         update: { markId },
         create: { assessmentId, questionId, markId },
-      })
-      logger.info('Created new hardSkillMark by', { createdBy });
-      return { assessmentId, questionId, markId } as HardSkill
-    },
-
-    async getHardSkillSections(options) {
-      const createdBy = options.credentials.principal.userEntityRef;
-      const rows = await prisma.hardSkillsSection.findMany({
-        select: { id: true, text: true },
       });
-      logger.info('Created new getHardSkillSections by', { createdBy });
-      return rows as SectionRow[];
+      logger.info('Upsert hard-skill mark', { createdBy });
+      return { assessmentId, questionId, markId } as HardSkill;
     },
 
-    async getHardSkillMarks(options) {
-      const createdBy = options.credentials.principal.userEntityRef;
-      const rows = await prisma.hardSkillsMark.findMany({
-        select: { id: true, text: true },
-      });
-      logger.info('Created new getHardSkillSections by', { createdBy });
-      return rows as MarkRow[];
+    async getHardSkillSections() {
+      return prisma.hardSkillsSection.findMany({ select: { id: true, text: true } });
     },
 
-    async getSoftSkillAreas(options) {
-      const rows = await prisma.area.findMany({
-        select: { id: true, text: true },
-      });
-
-      return rows as SectionRow[];
+    async getHardSkillMarks() {
+      return prisma.hardSkillsMark.findMany({ select: { id: true, text: true } });
     },
 
-    async getSoftSkillMarks(options) {
-      const rows = await prisma.softSkillsMark.findMany({
-        select: { id: true, text: true },
-      });
-
-      return rows as MarkRow[];
+    async getSoftSkillAreas() {
+      return prisma.area.findMany({ select: { id: true, text: true } });
     },
 
-    async getSoftSkillCompetencies(options) {
-      const rows = await prisma.competency.findMany({
+    async getSoftSkillMarks() {
+      return prisma.softSkillsMark.findMany({ select: { id: true, text: true } });
+    },
+
+    async getSoftSkillCompetencies() {
+      return prisma.competency.findMany({
         select: { areaId: true, competencyId: true, text: true },
       });
-
-      return rows as Competency[];
     },
 
-    async addComment(options, key, markId, commentText) {
+    async upsertSoftSkillComment(
+      options,
+      assessmentId,
+      areaId,
+      competencyId,
+      markId,
+      commentId,
+      commentText,
+    ) {
       const createdBy = options.credentials.principal.userEntityRef;
-      const newComment = await prisma.comment.create({
-        data: {
-          key: key,
-          markId: markId,
-          commentText: commentText,
-        },
+
+      let entry = await prisma.softSkillsTable.findFirst({
+        where: { assessmentId, areaId, competencyId },
       });
 
-      logger.info('Created comment by ', { createdBy });
+      if (!entry) {
+        const generatedKey = assessmentId * 100 + areaId * 10 + competencyId;
+        entry = await prisma.softSkillsTable.create({
+          data: { assessmentId, areaId, competencyId, key: generatedKey },
+        });
+      }
+
+      const comment = commentId
+        ? await prisma.comment.update({
+          where: { id: commentId },
+          data: { commentText, markId },
+        })
+        : await prisma.comment.create({
+          data: { key: entry.key, markId, commentText },
+        });
+
+      logger.info('Upsert soft-skill comment', { createdBy });
 
       return {
-        id: newComment.id.toString(),
-        commentText: newComment.commentText,
+        id: comment.id.toString(),
+        commentText: comment.commentText,
+        key: entry.key,
       };
+    },
+
+    async getSoftSkillComment(options, assessmentId, areaId, competencyId, markId) {
+      await options.credentials;
+      const row = await prisma.comment.findFirst({
+        where: { markId, softSkill: { assessmentId, areaId, competencyId } },
+        orderBy: { id: 'desc' },
+      });
+      return row
+        ? { id: row.id.toString(), commentText: row.commentText }
+        : null;
+    },
+
+    async getSoftSkillComments(options, assessmentId) {
+      await options.credentials;
+      const rows = await prisma.comment.findMany({
+        where: { softSkill: { assessmentId } },
+        select: {
+          id: true,
+          commentText: true,
+          markId: true,
+          softSkill: { select: { areaId: true, competencyId: true } },
+        },
+      });
+      return rows.map(r => ({
+        id: r.id,
+        commentText: r.commentText,
+        markId: r.markId,
+        areaId: r.softSkill.areaId,
+        competencyId: r.softSkill.competencyId,
+      }));
     },
 
     async getAssessments(options, teamId) {
       const user = options.credentials.principal.userEntityRef;
-      const assessments = await prisma.assessment.findMany({
-        where: {
-          createdBy: user,
-          groupId: teamId
-        },
-        select: {
-          targetUser: true
-        }
-      }).then(assessments => assessments.map(a => a.targetUser));
-
-      return assessments;
+      return prisma.assessment
+        .findMany({
+          where: { createdBy: user, groupId: teamId },
+          select: { targetUser: true },
+        })
+        .then(rows => rows.map(r => r.targetUser));
     },
 
     async getSampleText(options) {

@@ -1,4 +1,3 @@
-/* team-assessment/plugins/team-assessment/src/components/EditingAssessmentComponent/EditingAssessmentComponent.tsx */
 import React, { useState } from 'react';
 import { Page, Header, Content } from '@backstage/core-components';
 import {
@@ -85,7 +84,10 @@ export const EditingAssessmentComponent: React.FC<Props> = ({
       <div className={classes.rootContainer}>
         <Content className={classes.content}>
           {stage === 'soft' ? (
-            <EditingSoftSkillsComponent configData={configData} />
+            <EditingSoftSkillsComponent
+              assessmentId={assessmentId}
+              configData={configData}
+            />
           ) : (
             <EditingHardSkillsComponent
               assessmentId={assessmentId}
@@ -106,11 +108,7 @@ export const EditingAssessmentComponent: React.FC<Props> = ({
             {stage === 'soft' ? 'Hard Skills →' : '← Soft Skills'}
           </Button>
 
-          <Divider
-            orientation="vertical"
-            flexItem
-            style={{ backgroundColor: 'rgba(0,0,0,0.1)', height: 24, margin: theme.spacing(0, 1) }}
-          />
+          <Divider orientation="vertical" flexItem style={{ backgroundColor: 'rgba(0,0,0,0.1)', height: 24 }} />
 
           <Button
             onClick={onBackToMain}
@@ -121,11 +119,7 @@ export const EditingAssessmentComponent: React.FC<Props> = ({
             Back to Main
           </Button>
 
-          <Divider
-            orientation="vertical"
-            flexItem
-            style={{ backgroundColor: 'rgba(0,0,0,0.1)', height: 24, margin: theme.spacing(0, 1) }}
-          />
+          <Divider orientation="vertical" flexItem style={{ backgroundColor: 'rgba(0,0,0,0.1)', height: 24 }} />
 
           <Button
             onClick={handleSubmit}

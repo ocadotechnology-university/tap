@@ -7,7 +7,6 @@ import { useApi, fetchApiRef, discoveryApiRef } from '@backstage/core-plugin-api
 
 interface CommentCardProps {
   text: string;
-  // теперь прокидывайте из родителя эти пропсы
   section: string;
   teamId: string;
   markId: number;

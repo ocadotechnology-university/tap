@@ -1,28 +1,3 @@
-/**
- * EditingSoftSkillsComponent
- * ==========================
- * Hybrid data flow — authoritative sources
- * ---------------------------------------
- *   • Database (backend API):
- *       - area   → /softSkillAreas           (id ⇒ text)
- *       - title  → /softSkillCompetencies    (text)
- *       - labels → /softSkillMarks           (array of label texts)
- *
- *   • YAML config (assessment-config.yaml):
- *       - description keyed by title
- *
- * Behaviour
- * ---------
- *   1) Load dictionaries & competencies from the backend.
- *   2) Build a map:  title → description  from YAML.
- *   3) For every competency coming from DB, enrich it with the description
- *      found in YAML (fall back to an empty string if the title is missing in
- *      YAML, so UI never crashes).
- *   4) Group final records by **area name** (also coming from DB).
- *
- *   If a competency exists in the DB but has no description in YAML,
- *   it will still be displayed — just with an empty description.
- */
 
 import React, { useEffect, useState } from 'react';
 import {
@@ -35,12 +10,17 @@ import { useApi, fetchApiRef } from '@backstage/core-plugin-api';
 import { AssessmentSoftSkillsSection } from '../AssessmentSoftSkillsSection/AssessmentSoftSkillsSection';
 import { Skill } from '../EditingAssessmentComponent/EditingAssessmentComponent';
 
-type Props = { configData: Record<string, Skill[]> };
+type Props = {
+  assessmentId: number;
+  configData: Record<string, Skill[]>;
+};
 
 export type SoftSkillMerged = {
   title: string;
   description: string;
   area: string;
+  areaId: number;
+  competencyId: number;
   labels: string[];
 };
 
@@ -58,75 +38,90 @@ const useStyles = makeStyles(theme => ({
   loader: { display: 'flex', justifyContent: 'center', marginTop: theme.spacing(4) },
 }));
 
-export const EditingSoftSkillsComponent: React.FC<Props> = ({ configData }) => {
+interface CommentDTO {
+  id: number;
+  commentText: string;
+  areaId: number;
+  competencyId: number;
+  markId: number;
+}
+
+export const EditingSoftSkillsComponent: React.FC<Props> = ({
+  assessmentId,
+  configData,
+}) => {
   const classes = useStyles();
   const fetchApi = useApi(fetchApiRef);
 
   const [loading, setLoading] = useState(true);
   const [grouped, setGrouped] = useState<Record<string, SoftSkillMerged[]>>({});
+  const [marksMap, setMarksMap] = useState<Record<string, number>>({});
+  const [comments, setComments] = useState<CommentDTO[]>([]);
 
+  /* ── load dictionaries, competencies and comments ── */
   useEffect(() => {
     const load = async () => {
       try {
-        const [areasRes, marksRes, compsRes] = await Promise.all([
+        const [areasRes, marksRes, compsRes, commentsRes] = await Promise.all([
           fetchApi.fetch('http://localhost:7007/api/team-assessment/softSkillAreas'),
           fetchApi.fetch('http://localhost:7007/api/team-assessment/softSkillMarks'),
           fetchApi.fetch('http://localhost:7007/api/team-assessment/softSkillCompetencies'),
+          fetchApi.fetch(
+            `http://localhost:7007/api/team-assessment/softSkillComments?assessmentId=${assessmentId}`,
+          ),
         ]);
 
         const areas: { id: number; text: string }[] = await areasRes.json();
         const marks: { id: number; text: string }[] = await marksRes.json();
-        const comps: { areaId: number; text: string }[] = await compsRes.json();
+        const comps: { areaId: number; competencyId: number; text: string }[] =
+          await compsRes.json();
+        const commentsList: CommentDTO[] = await commentsRes.json();
 
         const areaIdToName = new Map<number, string>();
         areas.forEach(a => areaIdToName.set(a.id, a.text));
 
-        const genericLabels = marks.map(m => m.text);
+        const mMap: Record<string, number> = {};
+        marks.forEach(m => (mMap[m.text] = m.id));
+        setMarksMap(mMap);
 
-        /* 2. YAML lookup maps: description + per‑skill labels */
-        const softKey = Object.keys(configData).find(k =>
-          k.toLowerCase().includes('soft'),
-        );
-        const yamlRows: Skill[] = softKey ? configData[softKey] : [];
+        const softRows = configData[
+          Object.keys(configData).find(k => k.toLowerCase().includes('soft')) ?? ''
+        ] as Skill[] | undefined;
 
         const titleToDesc = new Map<string, string>();
         const titleToLabels = new Map<string, string[]>();
-        yamlRows.forEach(r => {
+        softRows?.forEach(r => {
           titleToDesc.set(r.title, r.description);
-          if (Array.isArray(r.labels) && r.labels.length) {
-            titleToLabels.set(r.title, r.labels);
-          }
+          if (r.labels?.length) titleToLabels.set(r.title, r.labels);
         });
 
-        /* 3. merge & group */
         const groupedData: Record<string, SoftSkillMerged[]> = {};
-
         comps.forEach(db => {
           const areaName = areaIdToName.get(db.areaId) ?? 'Unknown Area';
-
           const merged: SoftSkillMerged = {
             title: db.text,
             description: titleToDesc.get(db.text) ?? '',
-            labels: titleToLabels.get(db.text) ?? genericLabels,
+            labels: titleToLabels.get(db.text) ?? marks.map(m => m.text),
             area: areaName,
+            areaId: db.areaId,
+            competencyId: db.competencyId,
           };
-
           if (!groupedData[areaName]) groupedData[areaName] = [];
           groupedData[areaName].push(merged);
         });
 
         setGrouped(groupedData);
+        setComments(commentsList);
       } catch (e) {
-        console.error('Soft‑skills load failed', e);
+        console.error('Soft-skills load failed', e);
       } finally {
         setLoading(false);
       }
     };
 
     load();
-  }, [fetchApi, configData]);
+  }, [fetchApi, configData, assessmentId]);
 
-  /* -------- render -------- */
   if (loading)
     return (
       <div className={classes.loader}>
@@ -146,14 +141,21 @@ export const EditingSoftSkillsComponent: React.FC<Props> = ({ configData }) => {
       </div>
 
       <div className={classes.content}>
-        {Object.entries(grouped).map(([area, list]) => (
-          <AssessmentSoftSkillsSection key={area} area={area} sections={list} />
+        {Object.entries(grouped).map(([areaName, list]) => (
+          <AssessmentSoftSkillsSection
+            key={areaName}
+            area={areaName}
+            sections={list}
+            assessmentId={assessmentId}
+            marksMap={marksMap}
+            comments={comments}
+          />
         ))}
 
-        {Object.keys(grouped).length === 0 && (
+        {!Object.keys(grouped).length && (
           <Box mt={4}>
             <Typography align="center" color="textSecondary">
-              No soft‑skill data available
+              No soft-skill data available
             </Typography>
           </Box>
         )}

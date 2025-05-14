@@ -1,1 +1,1 @@
-export { AddCommentToSoftSkillsSectionMenu } from './AddCommentToSoftSkillsSectionMenu';
+export { default as AddCommentToSoftSkillsSectionMenu } from './AddCommentToSoftSkillsSectionMenu';
