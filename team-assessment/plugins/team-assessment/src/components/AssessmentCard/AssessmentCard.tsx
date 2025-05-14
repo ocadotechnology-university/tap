@@ -9,53 +9,82 @@ const useStyles = makeStyles(theme => ({
     minWidth: 220,
     maxWidth: 220,
     height: '100%',
-    borderRadius: '1rem',
-    border: '1px solid rgba(90,90,90)'
+    borderRadius: 8,
+    border: `1px solid ${theme.palette.divider}`,
+    display: 'flex',
+    flexDirection: 'column',
+    margin: theme.spacing(1, 0), // Added top and bottom margin
+    boxShadow: theme.shadows[1],
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      boxShadow: theme.shadows[4],
+      transform: 'translateY(-2px)',
+    },
   },
   header: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-  },
-  avatar: {
-    width: 64,
-    height: 64,
-    marginBottom: theme.spacing(2),
-    backgroundColor: theme.palette.primary.main
+    padding: theme.spacing(3),
+    flex: 1, // Takes remaining space pushing buttons to bottom
   },
   name: {
     fontWeight: 600,
-    fontSize: '1.2rem',
+    fontSize: '1.1rem',
     textAlign: 'center',
+    color: theme.palette.text.primary,
   },
   email: {
     color: theme.palette.text.secondary,
     textAlign: 'center',
     fontSize: '0.875rem',
     wordBreak: 'break-word',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '2.2rem',
+    marginTop: theme.spacing(1),
   },
   content: {
-    padding: theme.spacing(3),
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
-    gap: '1rem',
+    height: '100%',
+    padding: 0, // Remove padding from CardContent
+  },
+  buttonContainer: {
+    padding: theme.spacing(2),
+    paddingTop: 0, // Remove top padding
+    marginTop: 'auto', // Push to bottom
   },
   buttonGroup: {
     display: 'flex',
-    gap: '0.5rem',
+    gap: theme.spacing(1),
     width: '100%',
   },
+  primaryButton: {
+    backgroundColor: theme.palette.secondary.dark,
+    color: theme.palette.text.primary,
+    borderRadius: 10,
+    fontWeight: 500,
+    '&:hover': {
+      backgroundColor: theme.palette.secondary.main,
+      transform: 'scale(1.02)',
+    },
+    transition: 'all 0.3s ease',
+    boxShadow: theme.shadows[2],
+  },
+  outlinedButton: {
+    borderRadius: 10,
+    borderColor: theme.palette.secondary.dark,
+    color: theme.palette.secondary.main,
+    '&:hover': {
+      backgroundColor: theme.palette.action.hover,
+      borderColor: theme.palette.primary.dark,
+    },
+    transition: 'all 0.3s ease',
+  },
   disabledButton: {
+    borderRadius: 10,
     backgroundColor: theme.palette.action.disabledBackground,
     color: theme.palette.text.disabled,
-    '&:hover': {
-      backgroundColor: theme.palette.action.disabledBackground,
-    }
+    fontWeight: 500,
+    boxShadow: 'none',
   }
 }));
 
@@ -91,11 +120,11 @@ export const AssessmentCard = ({
   return (
     <Card className={classes.root}>
       <CardContent className={classes.content}>
-        <Avatar
-          displayName={displayName}
-          picture={user.picture}
-        />
-        <div>
+        <div className={classes.header}>
+          <Avatar
+            displayName={displayName}
+            picture={user.picture}
+          />
           <Typography variant="h6" className={classes.name}>
             {displayName}
           </Typography>
@@ -106,41 +135,41 @@ export const AssessmentCard = ({
           )}
         </div>
 
-        {variant === 'create' ? (
-          <Button
-            onClick={() => {
-              onCreateAssessment?.();
-            }}
-            variant="contained"
-            color="primary"
-            fullWidth
-            disabled={user.hasAssessment}
-            className={user.hasAssessment ? classes.disabledButton : ''}
-          >
-            {user.hasAssessment ? 'Assessment Created' : 'Create an assessment'}
-          </Button>
-        ) : (
-          <Box className={classes.buttonGroup}>
+        <div className={classes.buttonContainer}>
+          {variant === 'create' ? (
             <Button
-              onClick={onReviewAssessment}
+              onClick={onCreateAssessment}
               variant="contained"
-              color="primary"
               fullWidth
+              disabled={user.hasAssessment}
+              className={user.hasAssessment ? classes.disabledButton : classes.primaryButton}
             >
-              Review
+              {user.hasAssessment ? 'Assessment Created' : 'Create Assessment'}
             </Button>
-            <Button
-              onClick={() => {
-                onEditAssessment?.();
-                onStartEditing?.();
-              }}
-              variant="outlined"
-              fullWidth
-            >
-              Edit
-            </Button>
-          </Box>
-        )}
+          ) : (
+            <div className={classes.buttonGroup}>
+              <Button
+                onClick={onReviewAssessment}
+                variant="contained"
+                fullWidth
+                className={classes.primaryButton}
+              >
+                Review
+              </Button>
+              <Button
+                onClick={() => {
+                  onEditAssessment?.();
+                  onStartEditing?.();
+                }}
+                variant="outlined"
+                fullWidth
+                className={classes.outlinedButton}
+              >
+                Edit
+              </Button>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

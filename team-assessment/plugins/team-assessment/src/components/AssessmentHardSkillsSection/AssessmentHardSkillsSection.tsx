@@ -14,16 +14,22 @@ import { Skill } from '../EditingAssessmentComponent/EditingAssessmentComponent'
 
 const useStyles = makeStyles(theme => ({
     container: {
-        background: '#4caf50',
-        color: '#fff',
+        background: theme.palette.background.paper,
         padding: theme.spacing(2),
-        borderRadius: theme.spacing(1),
+        borderRadius: 8,
         width: 'calc(33% - 16px)',
         margin: theme.spacing(1),
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
         minHeight: 160,
+        boxShadow: theme.shadows[1],
+        border: `1px solid ${theme.palette.divider}`,
+        transition: 'all 0.3s ease',
+        '&:hover': {
+            boxShadow: theme.shadows[4],
+            transform: 'translateY(-1px)',
+        },
     },
     header: {
         display: 'flex',
@@ -31,23 +37,61 @@ const useStyles = makeStyles(theme => ({
         alignItems: 'center',
         marginBottom: theme.spacing(1),
     },
-    title: { fontWeight: 600, fontSize: '1.1rem', flex: 1 },
+    title: { 
+        fontWeight: 600, 
+        fontSize: '1.2rem',
+        color: theme.palette.text.primary,
+    },
     description: {
         fontSize: '0.9rem',
-        color: 'rgba(255,255,255,0.85)',
-        lineHeight: 1.4,
+        color: theme.palette.text.secondary,
+        lineHeight: 1.5,
+        marginBottom: 'auto',
         marginTop: theme.spacing(1),
     },
     answerContainer: {
         display: 'inline-flex',
         alignItems: 'center',
-        padding: theme.spacing(0.5, 1.5),
+        padding: theme.spacing(1, 3),
         borderRadius: 20,
-        border: '2px solid rgba(255,255,255,0.3)',
-        transition: 'all 0.2s ease',
-        '&:hover': { borderColor: '#fff', backgroundColor: 'rgba(255,255,255,0.1)' },
+        backgroundColor: theme.palette.background.default,
+        color: theme.palette.common.white,
+        transition: 'all 0.3s ease',
+        boxShadow: theme.shadows[2],
+        cursor: 'pointer', 
+        '&:hover': { 
+            backgroundColor: theme.palette.action.selected,
+            boxShadow: theme.shadows[4],
+            transform: 'scale(1.02)',
+        },
     },
-    answerText: { fontWeight: 500, cursor: 'pointer', fontSize: '0.9rem' },
+    answerText: { 
+        fontWeight: 500, 
+        cursor: 'pointer', 
+        fontSize: '0.875rem',
+    },
+    addButton: {
+        backgroundColor: theme.palette.secondary.main,
+        color: theme.palette.common.white,
+        width: 40,
+        height: 40,
+        '&:hover': {
+            backgroundColor: theme.palette.secondary.dark,
+            transform: 'scale(1.02)',
+        },
+        transition: 'all 0.3s ease',
+    },
+    menuItem: {
+        minWidth: 160,
+        fontSize: '0.875rem',
+        '&.Mui-selected': {
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.primary.dark,
+        },
+        '&:hover': {
+            backgroundColor: theme.palette.action.hover,
+        },
+    },
 }));
 
 interface Props {
@@ -104,8 +148,12 @@ export const AssessmentHardSkillsSection: React.FC<Props> = ({
 
                     <Box display="flex" alignItems="center">
                         {!selectedAnswer ? (
-                            <IconButton size="small" onClick={handleOpen} style={{ color: '#fff' }}>
-                                <AddIcon />
+                            <IconButton 
+                                size="small" 
+                                onClick={handleOpen} 
+                                className={classes.addButton}
+                            >
+                                <AddIcon fontSize="medium" />
                             </IconButton>
                         ) : (
                             <Box className={classes.answerContainer} onClick={handleOpen}>
@@ -124,13 +172,14 @@ export const AssessmentHardSkillsSection: React.FC<Props> = ({
                 onClose={handleClose}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+                getContentAnchorEl={null}
             >
                 {skill.labels.map(label => (
                     <MenuItem
                         key={label}
                         selected={label === selectedAnswer}
                         onClick={() => handleSelect(label)}
-                        style={{ minWidth: 140 }}
+                        className={classes.menuItem}
                     >
                         {label}
                     </MenuItem>

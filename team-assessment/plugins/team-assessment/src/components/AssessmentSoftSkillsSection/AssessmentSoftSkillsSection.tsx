@@ -8,7 +8,7 @@ import {
   Typography,
   makeStyles,
 } from '@material-ui/core';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+// import ExpandMoreIcon from '@material-ui/icons/ExpandMore'; // Temp comment
 import { AddCommentToSoftSkillsSectionMenu } from '../AddCommentToSoftSkillsSectionMenu';
 
 const useStyles = makeStyles(theme => ({
@@ -18,11 +18,19 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 8,
     width: '100%',
     marginBottom: theme.spacing(2),
+    border: `1px solid ${theme.palette.divider}`,
     cursor: 'pointer',
     '&:hover': { boxShadow: theme.shadows[3] },
   },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  dialogContent: { padding: theme.spacing(3), minWidth: 500 },
+  header: { 
+    display: 'flex', 
+    justifyContent: 'space-between', 
+    alignItems: 'center' 
+  },
+  dialogContent: { 
+    padding: theme.spacing(3), 
+    minWidth: 500 
+  },
   skillItem: {
     padding: theme.spacing(2),
     border: `1px solid ${theme.palette.grey[700]}`,
@@ -79,9 +87,10 @@ export const AssessmentSoftSkillsSection: React.FC<Props> = ({
       <Box className={classes.container} onClick={() => setOpen(true)}>
         <Box className={classes.header}>
           <Typography variant="h6">{area}</Typography>
-          <IconButton size="small">
+          {/* Temp comment */}
+          {/* <IconButton size="small">
             <ExpandMoreIcon />
-          </IconButton>
+          </IconButton> */}
         </Box>
       </Box>
 

@@ -7,18 +7,25 @@ import { getTeamAssessments } from '../../hooks/getTeamAssessments';
 
 const useStyles = makeStyles(theme => ({
   container: {
-    display: 'flex',
+   display: 'flex',
     flexDirection: 'column',
-    margin: '0',
+    margin: 0,
     background: theme.palette.background.paper,
-    padding: '1rem',
-    gap: '1rem',
+    padding: theme.spacing(2),
+    gap: theme.spacing(2),
     width: '100%',
     maxWidth: '100%',
+    borderRadius: 10,
+    boxShadow: theme.shadows[1],
+    border: `1px solid ${theme.palette.divider}`,
   },
   counter: {
     fontSize: '1rem',
     marginBottom: 0,
+  },
+  wrapper: {
+    fontSize: '1rem',
+    marginBottom: '1rem',
   },
 }));
 
@@ -42,7 +49,7 @@ export const MyAssessmentsComponent = () => {
             {value.allUsers
             .filter(user => user.hasAssessment)
             .map(user => (
-              <Box key={user.id} sx={{ minWidth: 240, pr: 2 }}>
+              <Box key={user.id} sx={{ minWidth: 240, pr: 2 }} className={classes.wrapper}>
                 <AssessmentCard 
                   user={user} 
                   variant="view" 

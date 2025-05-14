@@ -25,7 +25,13 @@ export type SoftSkillMerged = {
 };
 
 const useStyles = makeStyles(theme => ({
-  root: { padding: theme.spacing(2) },
+  root: { 
+    padding: theme.spacing(2),
+    overflow: 'hidden',
+    height: '100%',
+    width: '100%',
+    margin: 0,
+  },
   header: { marginBottom: theme.spacing(3) },
   title: { fontSize: '2rem', fontWeight: 600, color: theme.palette.text.primary },
   description: {

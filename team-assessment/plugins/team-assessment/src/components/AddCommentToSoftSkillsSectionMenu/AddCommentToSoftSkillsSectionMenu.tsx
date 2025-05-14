@@ -14,55 +14,80 @@ import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { useApi, fetchApiRef } from '@backstage/core-plugin-api';
 
-/* ---------- styles (taken from your demo) ---------- */
 const useStyles = makeStyles(theme => ({
   root: {
-    boxShadow: 'none',
+    boxShadow: theme.shadows[1],
     backgroundColor: theme.palette.background.paper,
-    borderRadius: theme.spacing(1),
-    margin: theme.spacing(1, 2),
+    borderRadius: 8,
+    margin: theme.spacing(1, 0),
     width: '100%',
+    border: `1px solid ${theme.palette.divider}`,
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      boxShadow: theme.shadows[4],
+      transform: 'translateY(-1px)',
+    },
   },
-  content: { padding: 0 },
+  content: { 
+    padding: 0,
+    '&:last-child': {
+      paddingBottom: 0,
+    },
+  },
 
-  /* big green label button */
+  /* main button */
   button: {
     display: 'flex',
     width: '100%',
     padding: theme.spacing(2),
-    backgroundColor: '#4CAF50',
-    color: '#fff',
-    borderRadius: theme.spacing(1),
+    backgroundColor: theme.palette.background.default,
+    color: theme.palette.text.primary,
+    borderRadius: 8,
     textTransform: 'none',
     fontSize: '1rem',
     justifyContent: 'space-between',
-    '&:hover': { backgroundColor: '#45A049' },
+    alignItems: 'center',
+    transition: 'all 0.3s ease',
+    '&:hover': { 
+      backgroundColor: theme.palette.action.hover,
+    },
   },
-  labelText: { fontWeight: 'bold', flex: 1, textAlign: 'left' },
+  labelText: { 
+    fontWeight: 600, 
+    flex: 1, 
+    textAlign: 'left',
+    fontSize: '1rem',
+  },
 
-  /* round + bubble */
+  /* round add button */
   addBubble: {
     minWidth: 40,
     minHeight: 40,
     borderRadius: '50%',
-    backgroundColor: '#4CAF50',
+    backgroundColor: theme.palette.secondary.main,
+    color: theme.palette.common.white,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    '&:hover': { backgroundColor: '#45A049' },
+    transition: 'all 0.3s ease',
+    boxShadow: theme.shadows[2],
+    '&:hover': { 
+      backgroundColor: theme.palette.secondary.dark,
+      transform: 'scale(1.05)',
+      boxShadow: theme.shadows[4],
+    },
   },
 
   /* comment list block */
   listWrapper: {
-    marginTop: theme.spacing(1.5),
-    border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.spacing(1),
+    marginTop: theme.spacing(1),
+    borderTop: `1px solid ${theme.palette.background.default}`,
   },
   commentRow: {
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(1),
-    padding: theme.spacing(1.25, 2),
+    padding: theme.spacing(1.5, 2),
     '&:not(:last-child)': {
       borderBottom: `1px solid ${theme.palette.divider}`,
     },
@@ -73,11 +98,21 @@ const useStyles = makeStyles(theme => ({
     borderRadius: 4,
     padding: theme.spacing(1),
     fontSize: '0.875rem',
+    border: `1px solid ${theme.palette.divider}`,
+    '&:focus-within': {
+      borderColor: theme.palette.primary.main,
+    },
   },
-  trashBtn: { padding: 4 },
+  trashBtn: { 
+    padding: 4,
+    color: theme.palette.text.secondary,
+    '&:hover': {
+      color: theme.palette.error.main,
+      backgroundColor: 'transparent',
+    },
+  },
 }));
 
-/* ---------- types ---------- */
 export interface CommentDTO {
   id: number;
   commentText: string;
@@ -93,7 +128,6 @@ interface Props {
   initialComments: CommentDTO[];
 }
 
-/* ---------- component ---------- */
 const AddCommentToSoftSkillsSectionMenu: React.FC<Props> = ({
   label,
   assessmentId,
@@ -112,7 +146,6 @@ const AddCommentToSoftSkillsSectionMenu: React.FC<Props> = ({
 
   const markId = marksMap[label];
 
-  /* ---------- helpers ---------- */
   const addDraft = () =>
     setDrafts(prev => [...prev, { tmp: crypto.randomUUID(), text: '' }]);
 
@@ -158,7 +191,6 @@ const AddCommentToSoftSkillsSectionMenu: React.FC<Props> = ({
     }
   };
 
-  /* ---------- key handling for drafts ---------- */
   const handleKey = (
     e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
     d: Draft,
@@ -170,18 +202,15 @@ const AddCommentToSoftSkillsSectionMenu: React.FC<Props> = ({
     }
   };
 
-  /* ---------- UI ---------- */
   return (
     <Card className={classes.root}>
       <CardContent className={classes.content}>
-        {/* green button */}
         <Button
           className={classes.button}
           onClick={() => setExpanded(p => !p)}
         >
           <Typography className={classes.labelText}>{label}</Typography>
 
-          {/* + bubble */}
           <Box
             className={classes.addBubble}
             onClick={e => {
@@ -190,17 +219,15 @@ const AddCommentToSoftSkillsSectionMenu: React.FC<Props> = ({
               addDraft();
             }}
           >
-            <AddIcon fontSize="large" style={{ color: '#fff' }} />
+            <AddIcon fontSize="medium" />
           </Box>
         </Button>
 
-        {/* list of drafts + saved comments */}
         {expanded && (
           <Box className={classes.listWrapper}>
-            {/* saved comments */}
             {comments.map(c => (
               <Box key={c.id} className={classes.commentRow}>
-                <Typography style={{ flex: 1, whiteSpace: 'pre-wrap' }}>
+                <Typography style={{ flex: 1, whiteSpace: 'pre-wrap', fontSize: '0.875rem' }}>
                   {c.commentText}
                 </Typography>
                 <IconButton
@@ -217,7 +244,6 @@ const AddCommentToSoftSkillsSectionMenu: React.FC<Props> = ({
               </Box>
             ))}
 
-            {/* open drafts */}
             {drafts.map(d => (
               <Box key={d.tmp} className={classes.commentRow}>
                 <InputBase

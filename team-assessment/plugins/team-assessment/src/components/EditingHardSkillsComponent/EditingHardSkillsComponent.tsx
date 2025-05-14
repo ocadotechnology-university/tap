@@ -9,6 +9,13 @@ import { TeamAssessmentSampleCardProps } from '../TeamAssessmentSampleCard/TeamA
 
 
 const useStyles = makeStyles(theme => ({
+  title: { fontSize: '2rem', fontWeight: 600, color: theme.palette.text.primary },
+  description: {
+    fontSize: '1rem',
+    color: theme.palette.text.secondary,
+    marginTop: theme.spacing(1),
+    lineHeight: 1.5,
+  },
   header: {
     width: '100%',
     padding: theme.spacing(3, 2),
@@ -30,6 +37,12 @@ const useStyles = makeStyles(theme => ({
     flexWrap: 'wrap',
     margin: theme.spacing(-1),
     padding: theme.spacing(2),
+    overflowX: 'hidden',
+    width: 'calc(100% + 16px)',
+  },
+  container: {
+    width: '100%',
+    overflow: 'hidden',
   },
 }));
 
@@ -93,13 +106,15 @@ export const EditingHardSkillsComponent: React.FC<Props> = ({
   if (loading) return <CircularProgress />;
 
   return (
-    <>
+    <div className={classes.container}>
       <div className={classes.header}>
-        <h2>Hard Skills Assessment</h2>
-        <p>
+        <Typography variant="h1" className={classes.title}>
+          Hard Skills Assessment
+        </Typography>
+        <Typography className={classes.description}>
           Evaluate technical proficiency across key development areas. Select
           ratings based on demonstrated expertise and practical implementation.
-        </p>
+        </Typography>
       </div>
 
       <div className={classes.grid}>
@@ -115,6 +130,6 @@ export const EditingHardSkillsComponent: React.FC<Props> = ({
           />
         ))}
       </div>
-    </>
+    </div>
   );
 };
