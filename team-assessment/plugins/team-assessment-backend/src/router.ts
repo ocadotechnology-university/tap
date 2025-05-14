@@ -26,6 +26,33 @@ export async function createRouter({
     res.status(200).json(data);
   });
 
+  router.post('/setHardSkillMark', async (req, res) => {
+    const { assessmentId, questionId, markId } = req.body;
+
+    const result = await teamAssessmentListService.upsertHardSkill(
+      { credentials: await httpAuth.credentials(req, { allow: ['user'] }) },
+      Number(assessmentId),
+      Number(questionId),
+      Number(markId),
+    );
+
+    res.status(201).json(result);
+  });
+
+  router.get('/hardSkillSections', async (req, res) => {
+    const sections = await teamAssessmentListService.getHardSkillSections(
+      { credentials: await httpAuth.credentials(req, { allow: ['user'] }) },
+    );
+    res.status(200).json(sections);
+  });
+
+  router.get('/hardSkillMarks', async (req, res) => {
+    const marks = await teamAssessmentListService.getHardSkillMarks(
+      { credentials: await httpAuth.credentials(req, { allow: ['user'] }) },
+    );
+    res.status(200).json(marks);
+  });
+
   router.post('/createAssessment', async (req, res) => {
     const { targetUser, teamId } = req.body;
     const result = await teamAssessmentListService.createAssessment(
