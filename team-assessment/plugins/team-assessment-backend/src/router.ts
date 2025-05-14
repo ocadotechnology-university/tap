@@ -109,6 +109,32 @@ export async function createRouter({
     res.status(204).send();
   });
 
+  router.put('/comment/:id', async (req, res) => {
+    const id = Number(req.params.id);
+    const { commentText } = req.body;
+
+    if (!commentText?.trim()) {
+      return res.status(400).json({ error: 'commentText is required' });
+    }
+
+    const updated = await prisma.comment.update({
+      where: { id },
+      data: { commentText: commentText.trim() },
+    });
+
+    res.status(200).json({
+      id: updated.id,
+      commentText: updated.commentText,
+    });
+  });
+
+  router.delete('/comment/:id', async (req, res) => {
+    const id = Number(req.params.id);
+    await prisma.comment.delete({ where: { id } });
+    res.status(204).send();
+  });
+
+
   router.get('/softSkillAreas', async (req, res) =>
     res.json(
       await teamAssessmentListService.getSoftSkillAreas({
