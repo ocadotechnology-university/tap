@@ -85,6 +85,4 @@ spec:
     email: infrastructure@example.com
     picture: https://example.com/groups/bu-infrastructure.jpeg
   children: []
-  parent: ops
-  children: [backstage, other]
   members: [jdoe]
