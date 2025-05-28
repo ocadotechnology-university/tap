@@ -120,8 +120,7 @@ export const ReviewAssessmentComponent: React.FC<Props> = ({
 
     useEffect(() => {
         fetchApi
-            .fetch('http://localhost:7007/api/team-assessment/hardSkillMarksByAssessment?assessmentId=${assessmentId}',
-            )
+            .fetch(`http://localhost:7007/api/team-assessment/hardSkillMarksByAssessment?assessmentId=${assessmentId}`)
             .then(res => res.json())
             .then(setHardMarks)
             .catch(console.error);

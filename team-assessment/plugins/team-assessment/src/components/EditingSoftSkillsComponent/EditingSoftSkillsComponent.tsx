@@ -66,7 +66,8 @@ export const EditingSoftSkillsComponent: React.FC<Props> = ({
           fetchApi.fetch('http://localhost:7007/api/team-assessment/softSkillAreas'),
           fetchApi.fetch('http://localhost:7007/api/team-assessment/softSkillMarks'),
           fetchApi.fetch('http://localhost:7007/api/team-assessment/softSkillCompetencies'),
-          fetchApi.fetch('http://localhost:7007/api/team-assessment/softSkillComments?assessmentId=${assessmentId}',
+          fetchApi.fetch(
+            `http://localhost:7007/api/team-assessment/softSkillComments?assessmentId=${assessmentId}`,
           ),
         ]);
 
