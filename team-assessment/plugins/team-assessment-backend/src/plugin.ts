@@ -1,9 +1,3 @@
-/*  team-assessment backend ─ plugin.ts
-    -----------------------------------
-    Registers the Backstage backend plugin AND adds a file‑watcher
-    so that editing assessment-config.yaml triggers live DB sync.
-*/
-
 import {
   coreServices,
   createBackendPlugin,
@@ -12,8 +6,8 @@ import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
 import { createRouter } from './router';
 import { createAssessmentListService } from './services/TodoListService/createAssessmentListService';
 import { loadAssessmentConfig } from './utils/loadAssessmentConfig';
-
-import chokidar from 'chokidar'; // <── file‑system watcher
+import { loadAccessConfig } from './utils/accessConfigLoader';
+import chokidar from 'chokidar';
 import path from 'path';
 
 export const teamAssessmentBackendPlugin = createBackendPlugin({
@@ -28,16 +22,22 @@ export const teamAssessmentBackendPlugin = createBackendPlugin({
         catalog: catalogServiceRef,
       },
       async init({ logger, auth, httpAuth, httpRouter, catalog }) {
-        // -----------------------------------------------------------------------
-        // 1) Initial load of YAML → DB on plugin startup
-        // -----------------------------------------------------------------------
+        // ───────────────────────────────────────────────────────────────
+        // 1) Initial YAML loads
+        // ───────────────────────────────────────────────────────────────
         await loadAssessmentConfig({ fullSync: true, logger }).catch(err =>
           logger.error('Initial config sync failed', err),
         );
 
-        // -----------------------------------------------------------------------
-        // 2) Create service + router (unchanged application logic)
-        // -----------------------------------------------------------------------
+        try {
+          loadAccessConfig();
+          logger.info('Access config loaded successfully');
+        } catch (err) {
+          logger.error('Initial access config load failed');
+        }
+        // ───────────────────────────────────────────────────────────────
+        // 2) Create service + router
+        // ───────────────────────────────────────────────────────────────
         const teamAssessmentListService = await createAssessmentListService({
           logger,
           auth,
@@ -51,10 +51,10 @@ export const teamAssessmentBackendPlugin = createBackendPlugin({
           }),
         );
 
-        // -----------------------------------------------------------------------
-        // 3) Watch assessment-config.yaml for live edits
-        // -----------------------------------------------------------------------
-        const cfgPath = path.join(
+        // ───────────────────────────────────────────────────────────────
+        // 3) Watch assessment-config.yaml
+        // ───────────────────────────────────────────────────────────────
+        const assessmentCfgPath = path.join(
           process.cwd(),
           '..',
           'app',
@@ -63,7 +63,7 @@ export const teamAssessmentBackendPlugin = createBackendPlugin({
         );
 
         chokidar
-          .watch(cfgPath, {
+          .watch(assessmentCfgPath, {
             ignoreInitial: true,
             awaitWriteFinish: {
               stabilityThreshold: 500,
@@ -76,6 +76,31 @@ export const teamAssessmentBackendPlugin = createBackendPlugin({
               logger.info('YAML sync completed successfully');
             } catch (err) {
               logger.error('YAML sync failed');
+            }
+          });
+
+        // ───────────────────────────────────────────────────────────────
+        // 4) Watch access-config.yaml
+        // ───────────────────────────────────────────────────────────────
+        const accessCfgPath = path.resolve(
+          __dirname,
+          'access-config.yaml',
+        );
+
+        chokidar
+          .watch(accessCfgPath, {
+            ignoreInitial: true,
+            awaitWriteFinish: {
+              stabilityThreshold: 500,
+            },
+          })
+          .on('change', () => {
+            logger.info('access-config.yaml changed – reloading config');
+            try {
+              loadAccessConfig();
+              logger.info('Access config reload successful');
+            } catch (err) {
+              logger.error('Access config reload failed');
             }
           });
       },
