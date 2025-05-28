@@ -54,7 +54,8 @@ import {
 import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
 import { TeamAssessmentPage } from '@internal/plugin-team-assessment';
-
+import { RequirePermission } from '@backstage/plugin-permission-react';
+import { teamAssessmentAccessPermission } from '../../permissions/permissions';
 import {
   EntityKubernetesContent,
   isKubernetesAvailable,
@@ -225,8 +226,10 @@ const websiteEntityPage = (
       {techdocsContent}
     </EntityLayout.Route>
     <EntityLayout.Route path="/team-assessment" title="Team Assessment">
-      <TeamAssessmentPage />
-    </EntityLayout.Route>
+      <RequirePermission permission={teamAssessmentAccessPermission}>
+        <TeamAssessmentPage />
+      </RequirePermission>
+</EntityLayout.Route>
   </EntityLayout>
 );
 
@@ -334,7 +337,9 @@ const groupPage = (
       </Grid>
     </EntityLayout.Route>
     <EntityLayout.Route path="/team-assessment" title="Team Assessment">
-      <TeamAssessmentPage />
+      <RequirePermission permission={teamAssessmentAccessPermission}>
+        <TeamAssessmentPage />
+      </RequirePermission>
     </EntityLayout.Route>
   </EntityLayout>
 );

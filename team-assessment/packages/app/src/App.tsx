@@ -37,7 +37,7 @@ import { CatalogGraphPage } from '@backstage/plugin-catalog-graph';
 import { RequirePermission } from '@backstage/plugin-permission-react';
 import { catalogEntityCreatePermission } from '@backstage/plugin-catalog-common/alpha';
 import { TeamAssessmentPage } from '@internal/plugin-team-assessment';
-
+import { teamAssessmentAccessPermission } from './permissions/permissions';
 const app = createApp({
   apis,
   bindRoutes({ bind }) {
@@ -96,7 +96,14 @@ const routes = (
     </Route>
     <Route path="/settings" element={<UserSettingsPage />} />
     <Route path="/catalog-graph" element={<CatalogGraphPage />} />
-    <Route path="/team-assessment" element={<TeamAssessmentPage />} />
+    <Route
+      path="/team-assessment"
+      element={
+        <RequirePermission permission={teamAssessmentAccessPermission}>
+          <TeamAssessmentPage />
+        </RequirePermission>
+      }
+    />
   </FlatRoutes>
 );
 
