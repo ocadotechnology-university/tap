@@ -1,5 +1,3 @@
-// team-assessment/plugins/team-assessment/src/components/CommentCard.tsx
-
 import React, { useRef, useState } from 'react';
 import { Box, IconButton, Typography, TextField } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';

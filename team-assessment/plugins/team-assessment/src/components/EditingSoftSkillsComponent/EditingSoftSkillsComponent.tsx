@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import {
   Typography,
@@ -10,11 +9,6 @@ import { useApi, fetchApiRef } from '@backstage/core-plugin-api';
 import { AssessmentSoftSkillsSection } from '../AssessmentSoftSkillsSection/AssessmentSoftSkillsSection';
 import { Skill } from '../EditingAssessmentComponent/EditingAssessmentComponent';
 
-type Props = {
-  assessmentId: number;
-  configData: Record<string, Skill[]>;
-};
-
 export type SoftSkillMerged = {
   title: string;
   description: string;
@@ -24,14 +18,22 @@ export type SoftSkillMerged = {
   labels: string[];
 };
 
+interface CommentDTO {
+  id: number;
+  commentText: string;
+  areaId: number;
+  competencyId: number;
+  markId: number;
+}
+
+interface Props {
+  assessmentId: number;
+  configData: Record<string, Skill[]>;
+  readOnly?: boolean;
+}
+
 const useStyles = makeStyles(theme => ({
-  root: { 
-    padding: theme.spacing(2),
-    overflow: 'hidden',
-    height: '100%',
-    width: '100%',
-    margin: 0,
-  },
+  root: { padding: theme.spacing(2), overflow: 'hidden', height: '100%', width: '100%', margin: 0 },
   header: { marginBottom: theme.spacing(3) },
   title: { fontSize: '2rem', fontWeight: 600, color: theme.palette.text.primary },
   description: {
@@ -44,17 +46,10 @@ const useStyles = makeStyles(theme => ({
   loader: { display: 'flex', justifyContent: 'center', marginTop: theme.spacing(4) },
 }));
 
-interface CommentDTO {
-  id: number;
-  commentText: string;
-  areaId: number;
-  competencyId: number;
-  markId: number;
-}
-
 export const EditingSoftSkillsComponent: React.FC<Props> = ({
   assessmentId,
   configData,
+  readOnly = false,
 }) => {
   const classes = useStyles();
   const fetchApi = useApi(fetchApiRef);
@@ -64,7 +59,6 @@ export const EditingSoftSkillsComponent: React.FC<Props> = ({
   const [marksMap, setMarksMap] = useState<Record<string, number>>({});
   const [comments, setComments] = useState<CommentDTO[]>([]);
 
-  /* ── load dictionaries, competencies and comments ── */
   useEffect(() => {
     const load = async () => {
       try {
@@ -72,8 +66,7 @@ export const EditingSoftSkillsComponent: React.FC<Props> = ({
           fetchApi.fetch('http://localhost:7007/api/team-assessment/softSkillAreas'),
           fetchApi.fetch('http://localhost:7007/api/team-assessment/softSkillMarks'),
           fetchApi.fetch('http://localhost:7007/api/team-assessment/softSkillCompetencies'),
-          fetchApi.fetch(
-            `http://localhost:7007/api/team-assessment/softSkillComments?assessmentId=${assessmentId}`,
+          fetchApi.fetch('http://localhost:7007/api/team-assessment/softSkillComments?assessmentId=${assessmentId}',
           ),
         ]);
 
@@ -90,13 +83,14 @@ export const EditingSoftSkillsComponent: React.FC<Props> = ({
         marks.forEach(m => (mMap[m.text] = m.id));
         setMarksMap(mMap);
 
-        const softRows = configData[
+        const softRows =
+          configData[
           Object.keys(configData).find(k => k.toLowerCase().includes('soft')) ?? ''
-        ] as Skill[] | undefined;
+          ] ?? [];
 
         const titleToDesc = new Map<string, string>();
         const titleToLabels = new Map<string, string[]>();
-        softRows?.forEach(r => {
+        softRows.forEach(r => {
           titleToDesc.set(r.title, r.description);
           if (r.labels?.length) titleToLabels.set(r.title, r.labels);
         });
@@ -128,6 +122,24 @@ export const EditingSoftSkillsComponent: React.FC<Props> = ({
     load();
   }, [fetchApi, configData, assessmentId]);
 
+  const handleCommentChange = (
+    action: 'add' | 'update' | 'delete',
+    payload: CommentDTO,
+  ) => {
+    setComments(prev => {
+      switch (action) {
+        case 'add':
+          return [...prev, payload];
+        case 'update':
+          return prev.map(c => (c.id === payload.id ? payload : c));
+        case 'delete':
+          return prev.filter(c => c.id !== payload.id);
+        default:
+          return prev;
+      }
+    });
+  };
+
   if (loading)
     return (
       <div className={classes.loader}>
@@ -155,6 +167,8 @@ export const EditingSoftSkillsComponent: React.FC<Props> = ({
             assessmentId={assessmentId}
             marksMap={marksMap}
             comments={comments}
+            readOnly={readOnly}
+            onCommentChange={handleCommentChange}
           />
         ))}
 

@@ -1,5 +1,3 @@
-// plugins/team-assessment-backend/src/services/TodoListService/createAssessmentListService/types.ts
-
 import {
   BackstageCredentials,
   BackstageUserPrincipal,
@@ -57,6 +55,11 @@ export interface TeamAssessmentListService {
     options: { credentials: BackstageCredentials<BackstageUserPrincipal> },
   ): Promise<MarkRow[]>;
 
+  getHardSkillMarksByAssessment(
+    options: { credentials: BackstageCredentials<BackstageUserPrincipal> },
+    assessmentId: number,
+  ): Promise<Array<{ questionId: number; markId: number }>>;
+
   getSoftSkillAreas(
     options: { credentials: BackstageCredentials<BackstageUserPrincipal> },
   ): Promise<SectionRow[]>;
@@ -87,24 +90,25 @@ export interface TeamAssessmentListService {
     markId: number,
   ): Promise<{ id: string; commentText: string } | null>;
 
+  getSoftSkillComments(
+    options: { credentials: BackstageCredentials<BackstageUserPrincipal> },
+    assessmentId: number,
+  ): Promise<
+    {
+      id: number;
+      commentText: string;
+      areaId: number;
+      competencyId: number;
+      markId: number;
+    }[]
+  >;
+
   getAssessments(
     options: { credentials: BackstageCredentials<BackstageUserPrincipal> },
     teamId: string,
-  ): Promise<string[]>;
+  ): Promise<{ targetUser: string; id: number }[]>;
 
   getSampleText(
     options: { credentials: BackstageCredentials<BackstageUserPrincipal> },
   ): Promise<{ message: string }>;
-
-  getSoftSkillComments(
-    options: { credentials: BackstageCredentials<BackstageUserPrincipal> },
-    assessmentId: number,
-  ): Promise<{
-    id: number;
-    commentText: string;
-    areaId: number;
-    competencyId: number;
-    markId: number;
-  }[]>;
-
 }

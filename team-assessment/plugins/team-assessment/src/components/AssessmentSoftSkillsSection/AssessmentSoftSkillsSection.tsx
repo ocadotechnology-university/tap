@@ -4,11 +4,9 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  IconButton,
   Typography,
   makeStyles,
 } from '@material-ui/core';
-// import ExpandMoreIcon from '@material-ui/icons/ExpandMore'; // Temp comment
 import { AddCommentToSoftSkillsSectionMenu } from '../AddCommentToSoftSkillsSectionMenu';
 
 const useStyles = makeStyles(theme => ({
@@ -22,15 +20,8 @@ const useStyles = makeStyles(theme => ({
     cursor: 'pointer',
     '&:hover': { boxShadow: theme.shadows[3] },
   },
-  header: { 
-    display: 'flex', 
-    justifyContent: 'space-between', 
-    alignItems: 'center' 
-  },
-  dialogContent: { 
-    padding: theme.spacing(3), 
-    minWidth: 500 
-  },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  dialogContent: { padding: theme.spacing(3), minWidth: 500 },
   skillItem: {
     padding: theme.spacing(2),
     border: `1px solid ${theme.palette.grey[700]}`,
@@ -67,6 +58,8 @@ interface Props {
   assessmentId: number;
   marksMap: Record<string, number>;
   comments: CommentDTO[];
+  readOnly?: boolean;
+  onCommentChange: (action: 'add' | 'update' | 'delete', c: CommentDTO) => void;
 }
 
 export const AssessmentSoftSkillsSection: React.FC<Props> = ({
@@ -75,22 +68,20 @@ export const AssessmentSoftSkillsSection: React.FC<Props> = ({
   assessmentId,
   marksMap,
   comments,
+  readOnly = false,
+  onCommentChange,
 }) => {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
 
-  const filterComments = (aId: number, cId: number, mId: number) =>
-    comments.filter(x => x.areaId === aId && x.competencyId === cId && x.markId === mId);
+  const filterComments = (a: number, c: number, m: number) =>
+    comments.filter(x => x.areaId === a && x.competencyId === c && x.markId === m);
 
   return (
     <>
       <Box className={classes.container} onClick={() => setOpen(true)}>
         <Box className={classes.header}>
           <Typography variant="h6">{area}</Typography>
-          {/* Temp comment */}
-          {/* <IconButton size="small">
-            <ExpandMoreIcon />
-          </IconButton> */}
         </Box>
       </Box>
 
@@ -111,7 +102,9 @@ export const AssessmentSoftSkillsSection: React.FC<Props> = ({
               <Box className={classes.labelContainer}>
                 {sec.labels.map(label => {
                   const markId = marksMap[label];
-                  const list = markId ? filterComments(sec.areaId, sec.competencyId, markId) : [];
+                  const list = markId
+                    ? filterComments(sec.areaId, sec.competencyId, markId)
+                    : [];
                   return (
                     <AddCommentToSoftSkillsSectionMenu
                       key={`${sec.title}-${label}`}
@@ -120,7 +113,12 @@ export const AssessmentSoftSkillsSection: React.FC<Props> = ({
                       areaId={sec.areaId}
                       competencyId={sec.competencyId}
                       marksMap={marksMap}
-                      initialComments={list}
+                      initialComments={list.map(c => ({
+                        id: c.id.toString(),
+                        commentText: c.commentText,
+                      }))}
+                      readOnly={readOnly}
+                      onCommentChange={onCommentChange}
                     />
                   );
                 })}

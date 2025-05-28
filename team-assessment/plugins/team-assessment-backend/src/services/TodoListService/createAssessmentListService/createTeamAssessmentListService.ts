@@ -1,5 +1,3 @@
-/* plugins/team-assessment-backend/src/services/TodoListService/createAssessmentListService/createTeamAssessmentListService.ts */
-
 import { AuthService, LoggerService } from '@backstage/backend-plugin-api';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node/alpha';
 import prisma from '../../../prismaClient';
@@ -52,6 +50,15 @@ export async function createAssessmentListService({
       return prisma.hardSkillsMark.findMany({ select: { id: true, text: true } });
     },
 
+    async getHardSkillMarksByAssessment(options, assessmentId) {
+      await options.credentials;
+      const rows = await prisma.hardSkill.findMany({
+        where: { assessmentId },
+        select: { questionId: true, markId: true },
+      });
+      return rows as Array<{ questionId: number; markId: number }>;
+    },
+
     async getSoftSkillAreas() {
       return prisma.area.findMany({ select: { id: true, text: true } });
     },
@@ -80,7 +87,6 @@ export async function createAssessmentListService({
       let entry = await prisma.softSkillsTable.findFirst({
         where: { assessmentId, areaId, competencyId },
       });
-
       if (!entry) {
         const generatedKey = assessmentId * 100 + areaId * 10 + competencyId;
         entry = await prisma.softSkillsTable.create({
@@ -139,12 +145,11 @@ export async function createAssessmentListService({
 
     async getAssessments(options, teamId) {
       const user = options.credentials.principal.userEntityRef;
-      return prisma.assessment
-        .findMany({
-          where: { createdBy: user, groupId: teamId },
-          select: { targetUser: true },
-        })
-        .then(rows => rows.map(r => r.targetUser));
+      const rows = await prisma.assessment.findMany({
+        where: { createdBy: user, groupId: teamId },
+        select: { id: true, targetUser: true },
+      });
+      return rows.map(r => ({ targetUser: r.targetUser, id: r.id }));
     },
 
     async getSampleText(options) {

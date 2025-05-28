@@ -1,4 +1,3 @@
-/* plugins/team-assessment-backend/src/router.ts */
 import { HttpAuthService } from '@backstage/backend-plugin-api';
 import express from 'express';
 import Router from 'express-promise-router';
@@ -158,6 +157,15 @@ export async function createRouter({
       }),
     ),
   );
+
+  router.get('/hardSkillMarksByAssessment', async (req, res) => {
+    const { assessmentId } = req.query;
+    const data = await teamAssessmentListService.getHardSkillMarksByAssessment(
+      { credentials: await httpAuth.credentials(req, { allow: ['user'] }) },
+      Number(assessmentId),
+    );
+    res.status(200).json(data);
+  });
 
   return router;
 }

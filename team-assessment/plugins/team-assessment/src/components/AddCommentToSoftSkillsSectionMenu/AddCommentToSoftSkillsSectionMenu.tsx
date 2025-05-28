@@ -16,6 +16,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import { v4 as uuidv4 } from 'uuid';
 import { useApi, fetchApiRef } from '@backstage/core-plugin-api';
 
+/* ─── styles ─── */
 const useStyles = makeStyles(theme => ({
   root: {
     boxShadow: theme.shadows[1],
@@ -85,6 +86,17 @@ interface Props {
   competencyId: number;
   marksMap: Record<string, number>;
   initialComments: SavedComment[];
+  readOnly?: boolean;
+  onCommentChange?: (
+    action: 'add' | 'update' | 'delete',
+    payload: {
+      id: number;
+      commentText: string;
+      areaId: number;
+      competencyId: number;
+      markId: number;
+    },
+  ) => void;
 }
 
 const AddCommentToSoftSkillsSectionMenu: React.FC<Props> = ({
@@ -94,11 +106,13 @@ const AddCommentToSoftSkillsSectionMenu: React.FC<Props> = ({
   competencyId,
   marksMap,
   initialComments,
+  readOnly = false,
+  onCommentChange,
 }) => {
   const classes = useStyles();
   const fetchApi = useApi(fetchApiRef);
 
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(initialComments.length > 0);
   const [saved, setSaved] = useState<SavedComment[]>(initialComments);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [editing, setEditing] = useState<{ id: string; text: string } | null>(null);
@@ -106,25 +120,47 @@ const AddCommentToSoftSkillsSectionMenu: React.FC<Props> = ({
 
   const markId = marksMap[label];
 
-  const addDraft = () => setDrafts(prev => [...prev, { tmp: uuidv4(), text: '' }]);
+  const notifyParent = (
+    action: 'add' | 'update' | 'delete',
+    id: number,
+    commentText: string,
+  ) => {
+    onCommentChange?.(action, {
+      id,
+      commentText,
+      areaId,
+      competencyId,
+      markId,
+    });
+  };
+
+  const addDraft = () =>
+    !readOnly && setDrafts(prev => [...prev, { tmp: uuidv4(), text: '' }]);
 
   const saveNew = async (d: Draft) => {
-    if (!d.text.trim()) return;
+    if (!d.text.trim()) {
+      setDrafts(prev => prev.filter(x => x.tmp !== d.tmp));
+      return;
+    }
     setLoading(true);
     try {
-      const r = await fetchApi.fetch('http://localhost:7007/api/team-assessment/upsertSoftSkillComment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          assessmentId,
-          areaId,
-          competencyId,
-          markId,
-          commentText: d.text.trim(),
-        }),
-      });
+      const r = await fetchApi.fetch(
+        'http://localhost:7007/api/team-assessment/upsertSoftSkillComment',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            assessmentId,
+            areaId,
+            competencyId,
+            markId,
+            commentText: d.text.trim(),
+          }),
+        },
+      );
       const j = (await r.json()) as { id: string; commentText: string };
       setSaved(prev => [...prev, { id: j.id, commentText: j.commentText }]);
+      notifyParent('add', Number(j.id), j.commentText);
     } finally {
       setDrafts(prev => prev.filter(x => x.tmp !== d.tmp));
       setLoading(false);
@@ -138,12 +174,20 @@ const AddCommentToSoftSkillsSectionMenu: React.FC<Props> = ({
     }
     setLoading(true);
     try {
-      await fetchApi.fetch(`http://localhost:7007/api/team-assessment/comment/${editing.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ commentText: editing.text.trim() }),
-      });
-      setSaved(prev => prev.map(c => (c.id === editing.id ? { ...c, commentText: editing.text.trim() } : c)));
+      await fetchApi.fetch(
+        `http://localhost:7007/api/team-assessment/comment/${editing.id}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ commentText: editing.text.trim() }),
+        },
+      );
+      setSaved(prev =>
+        prev.map(c =>
+          c.id === editing.id ? { ...c, commentText: editing.text.trim() } : c,
+        ),
+      );
+      notifyParent('update', Number(editing.id), editing.text.trim());
     } finally {
       setEditing(null);
       setLoading(false);
@@ -151,19 +195,25 @@ const AddCommentToSoftSkillsSectionMenu: React.FC<Props> = ({
   };
 
   const handleDelete = async (id: string) => {
+    if (readOnly) return;
     if (id.startsWith('tmp-')) {
       setDrafts(prev => prev.filter(d => d.tmp !== id));
       return;
     }
     setLoading(true);
     try {
-      await fetchApi.fetch(`http://localhost:7007/api/team-assessment/comment/${id}`, { method: 'DELETE' });
+      await fetchApi.fetch(
+        `http://localhost:7007/api/team-assessment/comment/${id}`,
+        { method: 'DELETE' },
+      );
       setSaved(prev => prev.filter(c => c.id !== id));
+      notifyParent('delete', Number(id), '');
     } finally {
       setLoading(false);
     }
   };
 
+  /* ─── buttons ─── */
   const handleKeyDraft = (
     e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
     d: Draft,
@@ -174,7 +224,9 @@ const AddCommentToSoftSkillsSectionMenu: React.FC<Props> = ({
     }
   };
 
-  const handleKeyEdit = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleKeyEdit = (
+    e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       updateComment();
@@ -185,14 +237,27 @@ const AddCommentToSoftSkillsSectionMenu: React.FC<Props> = ({
     }
   };
 
+  /* ─── UI ─── */
   return (
     <Card className={classes.root}>
       <CardContent className={classes.content}>
-        <Button className={classes.button} onClick={() => setExpanded(p => !p)}>
+        <Button
+          className={classes.button}
+          onClick={() => (readOnly ? undefined : setExpanded(p => !p))}
+        >
           <Typography className={classes.labelText}>{label}</Typography>
-          <Box className={classes.addBubble} onClick={(e: MouseEvent) => { e.stopPropagation(); if (!expanded) setExpanded(true); addDraft(); }}>
-            <AddIcon fontSize="small" />
-          </Box>
+          {!readOnly && (
+            <Box
+              className={classes.addBubble}
+              onClick={(e: MouseEvent) => {
+                e.stopPropagation();
+                if (!expanded) setExpanded(true);
+                addDraft();
+              }}
+            >
+              <AddIcon fontSize="small" />
+            </Box>
+          )}
         </Button>
 
         {expanded && (
@@ -212,18 +277,25 @@ const AddCommentToSoftSkillsSectionMenu: React.FC<Props> = ({
                   />
                 ) : (
                   <>
-                    <Typography
-                      style={{ flex: 1, whiteSpace: 'pre-wrap' }}
-                      onDoubleClick={() => setEditing({ id: c.id, text: c.commentText })}
-                    >
+                    <Typography style={{ flex: 1, whiteSpace: 'pre-wrap' }}>
                       {c.commentText}
                     </Typography>
-                    <IconButton className={classes.iconBtn} onClick={() => setEditing({ id: c.id, text: c.commentText })}>
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton className={classes.iconBtn} onClick={() => handleDelete(c.id)}>
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
+                    {!readOnly && (
+                      <>
+                        <IconButton
+                          className={classes.iconBtn}
+                          onClick={() => setEditing({ id: c.id, text: c.commentText })}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          className={classes.iconBtn}
+                          onClick={() => handleDelete(c.id)}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </>
+                    )}
                   </>
                 )}
               </Box>
@@ -238,11 +310,18 @@ const AddCommentToSoftSkillsSectionMenu: React.FC<Props> = ({
                   classes={{ root: classes.inputRoot }}
                   placeholder="Enter comment and press Enter"
                   value={d.text}
-                  onChange={e => setDrafts(prev => prev.map(x => (x.tmp === d.tmp ? { ...x, text: e.target.value } : x)))}
+                  onChange={e =>
+                    setDrafts(prev =>
+                      prev.map(x => (x.tmp === d.tmp ? { ...x, text: e.target.value } : x)),
+                    )
+                  }
                   onKeyDown={e => handleKeyDraft(e, d)}
                   disabled={loading}
                 />
-                <IconButton className={classes.iconBtn} onClick={() => handleDelete(d.tmp)}>
+                <IconButton
+                  className={classes.iconBtn}
+                  onClick={() => handleDelete(d.tmp)}
+                >
                   <DeleteIcon fontSize="small" />
                 </IconButton>
               </Box>

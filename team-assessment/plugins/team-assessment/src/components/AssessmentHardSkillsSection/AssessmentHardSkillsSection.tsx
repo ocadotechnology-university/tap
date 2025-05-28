@@ -9,7 +9,10 @@ import {
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import { useApi, fetchApiRef } from '@backstage/core-plugin-api';
-import { SectionMap, MarkMap } from '../EditingHardSkillsComponent/EditingHardSkillsComponent';
+import {
+    SectionMap,
+    MarkMap,
+} from '../EditingHardSkillsComponent/EditingHardSkillsComponent';
 import { Skill } from '../EditingAssessmentComponent/EditingAssessmentComponent';
 
 const useStyles = makeStyles(theme => ({
@@ -37,8 +40,8 @@ const useStyles = makeStyles(theme => ({
         alignItems: 'center',
         marginBottom: theme.spacing(1),
     },
-    title: { 
-        fontWeight: 600, 
+    title: {
+        fontWeight: 600,
         fontSize: '1.2rem',
         color: theme.palette.text.primary,
     },
@@ -58,16 +61,16 @@ const useStyles = makeStyles(theme => ({
         color: theme.palette.common.white,
         transition: 'all 0.3s ease',
         boxShadow: theme.shadows[2],
-        cursor: 'pointer', 
-        '&:hover': { 
+        cursor: 'pointer',
+        '&:hover': {
             backgroundColor: theme.palette.action.selected,
             boxShadow: theme.shadows[4],
             transform: 'scale(1.02)',
         },
     },
-    answerText: { 
-        fontWeight: 500, 
-        cursor: 'pointer', 
+    answerText: {
+        fontWeight: 500,
+        cursor: 'pointer',
         fontSize: '0.875rem',
     },
     addButton: {
@@ -101,6 +104,8 @@ interface Props {
     onAnswerChange: (answer: string) => void;
     sectionMap: SectionMap;
     markMap: MarkMap;
+    /** true — read only */
+    readOnly?: boolean;
 }
 
 export const AssessmentHardSkillsSection: React.FC<Props> = ({
@@ -110,12 +115,14 @@ export const AssessmentHardSkillsSection: React.FC<Props> = ({
     onAnswerChange,
     sectionMap,
     markMap,
+    readOnly = false,
 }) => {
     const classes = useStyles();
     const fetchApi = useApi(fetchApiRef);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-    const handleOpen = (e: MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
+    const handleOpen = (e: MouseEvent<HTMLElement>) =>
+        !readOnly && setAnchorEl(e.currentTarget);
     const handleClose = () => setAnchorEl(null);
 
     const handleSelect = async (label: string) => {
@@ -148,43 +155,55 @@ export const AssessmentHardSkillsSection: React.FC<Props> = ({
 
                     <Box display="flex" alignItems="center">
                         {!selectedAnswer ? (
-                            <IconButton 
-                                size="small" 
-                                onClick={handleOpen} 
-                                className={classes.addButton}
-                            >
-                                <AddIcon fontSize="medium" />
-                            </IconButton>
+                            !readOnly && (
+                                <IconButton
+                                    size="small"
+                                    onClick={handleOpen}
+                                    className={classes.addButton}
+                                >
+                                    <AddIcon fontSize="medium" />
+                                </IconButton>
+                            )
                         ) : (
-                            <Box className={classes.answerContainer} onClick={handleOpen}>
-                                <Typography className={classes.answerText}>{selectedAnswer}</Typography>
+                            <Box
+                                className={classes.answerContainer}
+                                onClick={handleOpen}
+                                style={readOnly ? { cursor: 'default' } : undefined}
+                            >
+                                <Typography className={classes.answerText}>
+                                    {selectedAnswer}
+                                </Typography>
                             </Box>
                         )}
                     </Box>
                 </Box>
 
-                <Typography className={classes.description}>{skill.description}</Typography>
+                <Typography className={classes.description}>
+                    {skill.description}
+                </Typography>
             </Box>
 
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-                getContentAnchorEl={null}
-            >
-                {skill.labels.map(label => (
-                    <MenuItem
-                        key={label}
-                        selected={label === selectedAnswer}
-                        onClick={() => handleSelect(label)}
-                        className={classes.menuItem}
-                    >
-                        {label}
-                    </MenuItem>
-                ))}
-            </Menu>
+            {!readOnly && (
+                <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+                    getContentAnchorEl={null}
+                >
+                    {skill.labels.map(label => (
+                        <MenuItem
+                            key={label}
+                            selected={label === selectedAnswer}
+                            onClick={() => handleSelect(label)}
+                            className={classes.menuItem}
+                        >
+                            {label}
+                        </MenuItem>
+                    ))}
+                </Menu>
+            )}
         </>
     );
 };

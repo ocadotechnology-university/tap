@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Progress, HorizontalScrollGrid } from '@backstage/core-components';
-import { Typography, Box, CircularProgress } from '@material-ui/core';
+import { Typography, CircularProgress } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useApi, fetchApiRef } from '@backstage/core-plugin-api';
 import { AssessmentHardSkillsSection } from '../AssessmentHardSkillsSection/AssessmentHardSkillsSection';
 import { Skill } from '../EditingAssessmentComponent/EditingAssessmentComponent';
-import { TeamAssessmentSampleCardProps } from '../TeamAssessmentSampleCard/TeamAssessmentSapmleCard'
-
 
 const useStyles = makeStyles(theme => ({
   title: { fontSize: '2rem', fontWeight: 600, color: theme.palette.text.primary },
@@ -19,12 +16,7 @@ const useStyles = makeStyles(theme => ({
   header: {
     width: '100%',
     padding: theme.spacing(3, 2),
-    '& h2': {
-      color: theme.palette.text.primary,
-      marginBottom: theme.spacing(1),
-      fontSize: '1.5rem',
-      fontWeight: 600,
-    },
+    '& h2': { color: theme.palette.text.primary, marginBottom: theme.spacing(1) },
     '& p': {
       color: theme.palette.text.secondary,
       fontSize: '0.95rem',
@@ -40,70 +32,85 @@ const useStyles = makeStyles(theme => ({
     overflowX: 'hidden',
     width: 'calc(100% + 16px)',
   },
-  container: {
-    width: '100%',
-    overflow: 'hidden',
-  },
+  container: { width: '100%', overflow: 'hidden' },
 }));
 
 export type SectionMap = Record<string, number>;
 export type MarkMap = Record<string, number>;
 
-type Props = {
+interface Props {
   assessmentId: number;
   configData: Record<string, Skill[]>;
   answers: Record<string, string>;
-  onAnswerChange: (skillTitle: string, answer: string) => void;
-};
+  onAnswerChange: (title: string, answer: string) => void;
+  initialMarks?: Array<{ questionId: number; markId: number }>;
+  readOnly?: boolean;
+}
 
 export const EditingHardSkillsComponent: React.FC<Props> = ({
   assessmentId,
   configData,
   answers,
   onAnswerChange,
+  initialMarks = [],
+  readOnly = false,
 }) => {
   const classes = useStyles();
   const fetchApi = useApi(fetchApiRef);
+
   const [sectionMap, setSectionMap] = useState<SectionMap>({});
   const [markMap, setMarkMap] = useState<MarkMap>({});
   const [loading, setLoading] = useState(true);
+  const [derived, setDerived] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const loadMappings = async () => {
+    (async () => {
       try {
-        const [sectionsRes, marksRes] = await Promise.all([
+        const [secRes, markRes] = await Promise.all([
           fetchApi.fetch('http://localhost:7007/api/team-assessment/hardSkillSections'),
           fetchApi.fetch('http://localhost:7007/api/team-assessment/hardSkillMarks'),
         ]);
-
-        const sections: { id: number; text: string }[] = await sectionsRes.json();
-        const marks: { id: number; text: string }[] = await marksRes.json();
+        const sections: { id: number; text: string }[] = await secRes.json();
+        const marks: { id: number; text: string }[] = await markRes.json();
 
         const sMap: SectionMap = {};
-        sections.forEach(s => (sMap[s.text] = s.id));
         const mMap: MarkMap = {};
+        sections.forEach(s => (sMap[s.text] = s.id));
         marks.forEach(m => (mMap[m.text] = m.id));
 
         setSectionMap(sMap);
         setMarkMap(mMap);
-      } catch (e) {
-        console.error(e);
       } finally {
         setLoading(false);
       }
-    }
-    loadMappings();
+    })();
   }, [fetchApi]);
 
-  if (loading) {
-    return <CircularProgress />;
-  }
+  useEffect(() => {
+    if (loading || !initialMarks.length || !Object.keys(sectionMap).length) return;
 
-  const hardSkillsCategory = Object.keys(configData).find(
-    key => key.toLowerCase().includes('hard')
-  );
+    const reverseSections = new Map<number, string>(
+      Object.entries(sectionMap).map(([k, v]) => [v, k]),
+    );
+    const reverseMarks = new Map<number, string>(
+      Object.entries(markMap).map(([k, v]) => [v, k]),
+    );
+
+    const tmp: Record<string, string> = {};
+    initialMarks.forEach(({ questionId, markId }) => {
+      const title = reverseSections.get(questionId);
+      const label = reverseMarks.get(markId);
+      if (title && label) tmp[title] = label;
+    });
+    setDerived(tmp);
+
+    Object.entries(tmp).forEach(([t, l]) => onAnswerChange(t, l));
+  }, [loading, sectionMap, markMap, initialMarks, onAnswerChange]);
 
   if (loading) return <CircularProgress />;
+
+  const hardCategory =
+    Object.keys(configData).find(k => k.toLowerCase().includes('hard')) || '';
 
   return (
     <div className={classes.container}>
@@ -112,21 +119,22 @@ export const EditingHardSkillsComponent: React.FC<Props> = ({
           Hard Skills Assessment
         </Typography>
         <Typography className={classes.description}>
-          Evaluate technical proficiency across key development areas. Select
-          ratings based on demonstrated expertise and practical implementation.
+          Evaluate technical proficiency across key development areas. Select ratings based on
+          demonstrated expertise and practical implementation.
         </Typography>
       </div>
 
       <div className={classes.grid}>
-        {(configData[hardSkillsCategory || ''] || []).map(skill => (
+        {(configData[hardCategory] || []).map(skill => (
           <AssessmentHardSkillsSection
             key={skill.title}
             assessmentId={assessmentId}
             skill={skill}
-            selectedAnswer={answers[skill.title] || ''}
-            onAnswerChange={answer => onAnswerChange(skill.title, answer)}
+            selectedAnswer={answers[skill.title] ?? derived[skill.title] ?? ''}
+            onAnswerChange={ans => onAnswerChange(skill.title, ans)}
             sectionMap={sectionMap}
             markMap={markMap}
+            readOnly={readOnly}
           />
         ))}
       </div>

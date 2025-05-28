@@ -13,10 +13,10 @@ export const ButtonComponent = () => {
     setLoading(true);
     setError(null);
     setResponse(null);
-    
+
     try {
       const result = await fetchApi.fetch(
-        'http://localhost:7007/api/team-assessment/createAssessment',  // Заміни на правильний шлях API
+        'http://localhost:7007/api/team-assessment/createAssessment',
         {
           method: 'POST',
           headers: {
@@ -24,8 +24,8 @@ export const ButtonComponent = () => {
             Accept: 'application/json',
           },
           body: JSON.stringify({
-            userId: '123',  // Це значення потрібно замінити на реальний userId
-            teamId: 'team123', // Це значення потрібно замінити на реальний teamId
+            userId: '123',
+            teamId: 'team123',
           }),
         }
       );
@@ -53,11 +53,11 @@ export const ButtonComponent = () => {
       >
         {loading ? 'Creating...' : 'Create Assessment'}
       </Button>
-      
+
       {error && (
         <div style={{ color: 'red' }}>Error: {error.message}</div>
       )}
-      
+
       {response && (
         <div style={{ color: 'green' }}>{response}</div>
       )}
