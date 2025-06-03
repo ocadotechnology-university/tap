@@ -158,14 +158,23 @@ export async function createRouter({
     ),
   );
 
-  router.get('/hardSkillMarksByAssessment', async (req, res) => {
-    const { assessmentId } = req.query;
-    const data = await teamAssessmentListService.getHardSkillMarksByAssessment(
-      { credentials: await httpAuth.credentials(req, { allow: ['user'] }) },
-      Number(assessmentId),
-    );
-    res.status(200).json(data);
+  router.get('/my-assessments', async (req, res) => {
+    const credentials = await httpAuth.credentials(req, { allow: ['user'] });
+    const userEntityRef = credentials.principal.userEntityRef;
+
+    const assessments = await prisma.assessment.findMany({
+      where: {
+        createdBy: userEntityRef,
+      },
+      include: {
+        hardSkills: true,
+        softSkills: true,
+      },
+    });
+
+    res.status(200).json(assessments);
   });
+
 
   return router;
 }

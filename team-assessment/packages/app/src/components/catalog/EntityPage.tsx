@@ -61,6 +61,8 @@ import {
   isKubernetesAvailable,
 } from '@backstage/plugin-kubernetes';
 
+import { usePermission } from '@backstage/plugin-permission-react';
+
 const techdocsContent = (
   <EntityTechdocsContent>
     <TechDocsAddons>
@@ -317,32 +319,39 @@ const userPage = (
   </EntityLayout>
 );
 
-const groupPage = (
-  <EntityLayout>
-    <EntityLayout.Route path="/" title="Overview">
-      <Grid container spacing={3}>
-        {entityWarningContent}
-        <Grid item xs={12} md={6}>
-          <EntityGroupProfileCard variant="gridItem" />
+const GroupPage = () => {
+  const { loading, allowed } = usePermission({ permission: teamAssessmentAccessPermission });
+
+  if (loading) return null; // або спінер
+
+  return (
+    <EntityLayout>
+      <EntityLayout.Route path="/" title="Overview">
+        <Grid container spacing={3}>
+          {entityWarningContent}
+          <Grid item xs={12} md={6}>
+            <EntityGroupProfileCard variant="gridItem" />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <EntityOwnershipCard variant="gridItem" />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <EntityMembersListCard />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <EntityLinksCard />
+          </Grid>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <EntityOwnershipCard variant="gridItem" />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <EntityMembersListCard />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <EntityLinksCard />
-        </Grid>
-      </Grid>
-    </EntityLayout.Route>
-    <EntityLayout.Route path="/team-assessment" title="Team Assessment">
-      <RequirePermission permission={teamAssessmentAccessPermission}>
-        <TeamAssessmentPage />
-      </RequirePermission>
-    </EntityLayout.Route>
-  </EntityLayout>
-);
+      </EntityLayout.Route>
+
+      {allowed && (
+        <EntityLayout.Route path="/team-assessment" title="Team Assessment">
+          <TeamAssessmentPage />
+        </EntityLayout.Route>
+      )}
+    </EntityLayout>
+  );
+};
 
 const systemPage = (
   <EntityLayout>
@@ -414,7 +423,9 @@ export const entityPage = (
   <EntitySwitch>
     <EntitySwitch.Case if={isKind('component')} children={componentPage} />
     <EntitySwitch.Case if={isKind('api')} children={apiPage} />
-    <EntitySwitch.Case if={isKind('group')} children={groupPage} />
+    <EntitySwitch.Case if={isKind('group')}>
+      <GroupPage />
+    </EntitySwitch.Case>
     <EntitySwitch.Case if={isKind('user')} children={userPage} />
     <EntitySwitch.Case if={isKind('system')} children={systemPage} />
     <EntitySwitch.Case if={isKind('domain')} children={domainPage} />
