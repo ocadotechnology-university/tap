@@ -1,0 +1,1 @@
+export { AdminUserListComponent } from './AdminUserListComponent';

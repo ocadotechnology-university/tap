@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core';
 import yaml from 'js-yaml';
 import { Page, Content } from '@backstage/core-components';
+import { usePermission } from '@backstage/plugin-permission-react';
 
-import { TeamAssessmentSampleCard } from '../TeamAssessmentSampleCard';
-import { MyAssessmentsComponent } from '../MyAssessmentsComponent/MyAssessmentsComponent';
+import { teamAssessmentAdminPermission } from '../../../../../packages/app/src/permissions/permissions'; // шлях з MainPageComponent до packages/app/src/permissions/permissions.ts
+
 import { EditAssessmentComponent } from '../EditAssessmentComponent/EditAssessmentComponent';
 import { ReviewAssessmentComponent } from '../ReviewAssessmentComponent/ReviewAssessmentComponent';
 import { Skill } from '../EditingAssessmentComponent/EditingAssessmentComponent';
+import { MainMenuComponent } from '../MainMenuComponent/MainMenuComponent';
+import { AdminMainMenuComponent } from '../AdminMainMenuComponent/AdminMainMenuComponent';
 
 const useStyles = makeStyles({
   content: {
@@ -24,6 +27,10 @@ export const MainPageComponent = () => {
   const [configData, setConfigData] = useState<Record<string, Skill[]> | null>(null);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [mode, setMode] = useState<'main' | 'edit' | 'review'>('main');
+
+  const { allowed: isAdmin, loading: adminLoading } = usePermission({
+    permission: teamAssessmentAdminPermission,
+  });
 
   useEffect(() => {
     (async () => {
@@ -48,6 +55,14 @@ export const MainPageComponent = () => {
     setMode('review');
   };
 
+  if (adminLoading) {
+    return (
+      <Page themeId="tool">
+        <Content className={classes.content}>Loading permissions...</Content>
+      </Page>
+    );
+  }
+
   return (
     <Page themeId="tool">
       <Content className={classes.content}>
@@ -63,14 +78,13 @@ export const MainPageComponent = () => {
             configData={configData}
             onBackToMain={backToMain}
           />
+        ) : isAdmin ? (
+          <AdminMainMenuComponent/>
         ) : (
-          <>
-            <TeamAssessmentSampleCard onStartEditing={startEditing} />
-            <MyAssessmentsComponent
-              onReviewAssessment={startReviewing}
-              onEditAssessment={startEditing}
-            />
-          </>
+          <MainMenuComponent
+            onStartEditing={startEditing}
+            onStartReviewing={startReviewing}
+          />
         )}
       </Content>
     </Page>

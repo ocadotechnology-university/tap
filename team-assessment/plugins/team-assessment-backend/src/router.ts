@@ -175,6 +175,64 @@ export async function createRouter({
     res.status(200).json(assessments);
   });
 
+  router.get('/getAllAssessments', async (req, res) => {
+    const assessments = await prisma.assessment.findMany({
+      select: {
+        createdBy: true,
+        targetUser: true,
+        date: true,
+      },
+    });
 
+    res.status(200).json(assessments);
+  });
+
+  router.get('/user-assessments', async (req, res) => {
+    const { userId } = req.query;
+    if (!userId || typeof userId !== 'string') {
+      return res.status(400).json({ error: 'userId is required' });
+    }
+
+    const assessments = await prisma.assessment.findMany({
+      where: { targetUser: userId },
+      include: {
+        hardSkills: {
+          include: {
+            section: true,
+            mark: true,
+          },
+        },
+        softSkills: {
+          include: {
+            area: true,
+            competency: true,
+            comments: {
+              include: {
+                mark: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    res.status(200).json(assessments);
+  });
+  router.get('/user-assessment-stat', async (req, res) => {
+    const { userId } = req.query;
+
+    if (!userId || typeof userId !== 'string') {
+      return res.status(400).json({ error: 'userId is required' });
+    }
+
+    const credentials = await httpAuth.credentials(req, { allow: ['user'] });
+
+    const data = await teamAssessmentListService.getUserAssessmentStat(
+      { credentials },
+      userId,
+    );
+
+    res.status(200).json(data);
+  });
   return router;
 }

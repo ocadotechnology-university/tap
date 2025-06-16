@@ -11,6 +11,11 @@ import {
   makeStyles,
   Theme,
   useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@material-ui/core';
 import { EditingSoftSkillsComponent } from '../EditingSoftSkillsComponent/EditingSoftSkillsComponent';
 import { EditingHardSkillsComponent } from '../EditingHardSkillsComponent/EditingHardSkillsComponent';
@@ -40,33 +45,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(2),
-  },
-  backButton: {
-    position: 'fixed',
-    right: theme.spacing(10),
-    bottom: theme.spacing(7),
-    minWidth: 40,
-    minHeight: 40,
-    width: 40,
-    height: 40,
-    borderRadius: '50%',
-    padding: 0,
-    zIndex: 1000,
-    boxShadow: theme.shadows[6],
-    color: theme.palette.common.white,
-    backgroundColor: theme.palette.error.main,
-    '&:hover': {
-      transform: 'scale(1.1)',
-      backgroundColor: theme.palette.error.dark,
-      boxShadow: theme.shadows[8],
-    },
-    '&:active': {
-      transform: 'scale(0.95)',
-    },
-    transition: 'all 0.3s ease',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   submitButton: {
     position: 'fixed',
@@ -129,12 +107,15 @@ export const EditingAssessmentComponent: React.FC<Props> = ({
   const theme = useTheme();
   const [currentStage, setCurrentStage] = useState<'softSkills' | 'hardSkills'>('softSkills');
   const [answers, setAnswers] = useState<Answers>({});
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleAnswerChange = (title: string, answer: string) =>
     setAnswers(prev => ({ ...prev, [title]: answer }));
 
   const handleSubmit = () => {
+    // Logic of saving files
     console.log('Submitted answers:', answers);
+    setConfirmOpen(false);
     onBackToMain();
   };
 
@@ -178,21 +159,34 @@ export const EditingAssessmentComponent: React.FC<Props> = ({
       )}
 
       <Button
-        onClick={onBackToMain}
-        variant="contained"
-        className={classes.backButton}
-        disableElevation
-      >
-        <CloseIcon style={{ fontSize: '2rem' }} />
-      </Button>
-      <Button
-        onClick={onBackToMain}
+        onClick={() => setConfirmOpen(true)}
         variant="contained"
         className={classes.submitButton}
         style={{ backgroundColor: '#4caf50' }}
       >
-        <CheckIcon className="check-icon" fontSize="large" /> { }
+        <CheckIcon className="check-icon" fontSize="large" />{' '}
       </Button>
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+      >
+        <DialogTitle>Підтвердження</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Ви впевнені, що хочете вийти з редагування оцінювання?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)} color="primary">
+            Скасувати
+          </Button>
+          <Button onClick={handleSubmit} color="primary" autoFocus>
+            Так, вийти
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

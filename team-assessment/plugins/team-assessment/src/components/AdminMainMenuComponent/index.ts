@@ -1,0 +1,1 @@
+export { AdminMainMenuComponent } from './AdminMainMenuComponent';

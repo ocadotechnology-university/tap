@@ -14,10 +14,18 @@ import {
   PolicyQueryUser,
 } from '@backstage/plugin-permission-node';
 import { policyExtensionPoint } from '@backstage/plugin-permission-node/alpha';
-import { teamAssessmentAccessPermission } from '../../../../plugins/team-assessment-backend/src/permissions/permissions';
-import { getAccessConfig } from '../../../../plugins/team-assessment-backend/src/utils/accessConfigLoader';
 
-type AccessConfig = {
+import {
+  teamAssessmentAccessPermission,
+  teamAssessmentAdminPermission,
+} from '../../../../plugins/team-assessment-backend/src/permissions/permissions';
+
+const accessConfigPath = path.resolve(
+  __dirname,
+  '../../../../plugins/team-assessment-backend/access-config.yaml',
+);
+
+const accessConfig = yaml.parse(fs.readFileSync(accessConfigPath, 'utf8')) as {
   permissions: {
     teamAssessment: {
       allowedGroups: string[];
@@ -26,23 +34,9 @@ type AccessConfig = {
   };
 };
 
-// === Завантаження YAML-конфігурації під час створення політики ===
-const accessConfigPath = path.resolve(
-  __dirname,
-  '../../../../plugins/team-assessment-backend/access-config.yaml',
-);
-
-const accessConfig: AccessConfig = yaml.parse(
-  fs.readFileSync(accessConfigPath, 'utf8'),
-);
-class CustomPermissionPolicy implements PermissionPolicy {
-  async handle(
-    request: PolicyQuery,
-    user?: PolicyQueryUser,
-  ): Promise<PolicyDecision> {
-    if (!isPermission(request.permission, teamAssessmentAccessPermission)) {
-      return { result: AuthorizeResult.ALLOW };
-    }
+class CombinedPermissionPolicy implements PermissionPolicy {
+  async handle(request: PolicyQuery, user?: PolicyQueryUser): Promise<PolicyDecision> {
+    const { adminUsers, allowedGroups } = accessConfig.permissions.teamAssessment;
 
     if (!user) {
       return { result: AuthorizeResult.DENY };
@@ -51,85 +45,29 @@ class CustomPermissionPolicy implements PermissionPolicy {
     const userRef = user.info.userEntityRef;
     const userOwnershipRefs = user.info.ownershipEntityRefs ?? [];
 
-    const { adminUsers, allowedGroups } = getAccessConfig().permissions.teamAssessment;
-
-
-    if (adminUsers.includes(userRef)) {
-      return { result: AuthorizeResult.ALLOW };
+    if (isPermission(request.permission, teamAssessmentAdminPermission)) {
+      const isAdmin = adminUsers.includes(userRef);
+      return { result: isAdmin ? AuthorizeResult.ALLOW : AuthorizeResult.DENY };
     }
 
-    const hasAllowedGroup = userOwnershipRefs.some(ref => allowedGroups.includes(ref));
-
-    if (hasAllowedGroup) {
-      return { result: AuthorizeResult.ALLOW };
+    if (isPermission(request.permission, teamAssessmentAccessPermission)) {
+      const hasGroup = userOwnershipRefs.some(ref => allowedGroups.includes(ref));
+      return { result: hasGroup ? AuthorizeResult.ALLOW : AuthorizeResult.DENY };
     }
 
-    return { result: AuthorizeResult.DENY };
+    return { result: AuthorizeResult.ALLOW };
   }
 }
 
-
 export default createBackendModule({
   pluginId: 'permission',
-  moduleId: 'permission-policy',
+  moduleId: 'combined-permission-policy',
   register(reg) {
     reg.registerInit({
       deps: { policy: policyExtensionPoint },
       async init({ policy }) {
-        policy.setPolicy(new CustomPermissionPolicy());
+        policy.setPolicy(new CombinedPermissionPolicy());
       },
     });
   },
 });
-
-
-// import { createBackendModule } from '@backstage/backend-plugin-api';
-// import {
-//   PolicyDecision,
-//   AuthorizeResult,
-//   isPermission,
-// } from '@backstage/plugin-permission-common';
-// import {
-//   PermissionPolicy,
-//   PolicyQuery,
-//   PolicyQueryUser,
-// } from '@backstage/plugin-permission-node';
-// import { policyExtensionPoint } from '@backstage/plugin-permission-node/alpha';
-// import { teamAssessmentAccessPermission } from '../../../../plugins/team-assessment-backend/src/permissions/permissions';
-
-// class CustomPermissionPolicy implements PermissionPolicy {
-//   async handle(
-//     request: PolicyQuery,
-//     user?: PolicyQueryUser,
-//   ): Promise<PolicyDecision> {
-//     // Якщо це запит на teamAssessmentAccessPermission
-//     if (isPermission(request.permission, teamAssessmentAccessPermission)) {
-//       // Перевіряємо, чи користувач є гостем
-//       // Наприклад, у user.identity.provider === 'guest'
-//       // Або в user.groups міститься 'guest' — залежить від конфігурації авторизації
-
-//       if (user?.identity?.userEntityRef === 'user:development/guest') {
-//         return { result: AuthorizeResult.DENY };
-//       } else {
-//         return { result: AuthorizeResult.ALLOW };
-//       }
-//     }
-
-//     // Для інших дозволів даємо дозвіл за замовчуванням
-//     return { result: AuthorizeResult.ALLOW };
-//   }
-// }
-
-
-// export default createBackendModule({
-//   pluginId: 'permission',
-//   moduleId: 'permission-policy',
-//   register(reg) {
-//     reg.registerInit({
-//       deps: { policy: policyExtensionPoint },
-//       async init({ policy }) {
-//         policy.setPolicy(new CustomPermissionPolicy());
-//       },
-//     });
-//   },
-// });
