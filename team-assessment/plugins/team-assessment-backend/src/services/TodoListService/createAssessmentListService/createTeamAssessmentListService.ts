@@ -141,7 +141,7 @@ export async function createAssessmentListService({
     },
 
     async getUserAssessmentStat(options, userId) {
-      await options.credentials; // ensure credentials required, same as in other methods
+      await options.credentials;
 
       const assessments = await prisma.assessment.findMany({
         where: { targetUser: userId },
@@ -166,8 +166,21 @@ export async function createAssessmentListService({
         },
       });
 
-      const softSkills: Record<string, Record<string, { user: string; comment: string; mark: string }[]>> = {};
-      const hardSkills: Record<string, { user: string; mark: string }[]> = {};
+      const softSkills: Record<
+        string,
+        {
+          _areaName: string;
+          [competencyId: string]: {
+            _competencyName: string;
+            entries: { user: string; comment: string; mark: string }[];
+          } | string;
+        }
+      > = {};
+
+      const hardSkills: Record<
+        string,
+        { user: string; mark: string; _questionText?: string }[]
+      > = {};
 
       for (const assessment of assessments) {
         const author = assessment.createdBy;
@@ -175,6 +188,8 @@ export async function createAssessmentListService({
         for (const soft of assessment.softSkills) {
           const areaId = soft.areaId.toString();
           const competencyId = soft.competencyId.toString();
+          const areaName = soft.area.text;
+          const competencyName = soft.competency.text;
 
           const comments = soft.comments.map(comment => ({
             user: author,
@@ -182,18 +197,30 @@ export async function createAssessmentListService({
             mark: comment.mark.text,
           }));
 
-          if (!softSkills[areaId]) softSkills[areaId] = {};
-          if (!softSkills[areaId][competencyId]) softSkills[areaId][competencyId] = [];
-          softSkills[areaId][competencyId].push(...comments);
+          if (!softSkills[areaId]) {
+            softSkills[areaId] = { _areaName: areaName };
+          }
+
+          if (!softSkills[areaId][competencyId]) {
+            softSkills[areaId][competencyId] = {
+              _competencyName: competencyName,
+              entries: [],
+            };
+          }
+
+          (softSkills[areaId][competencyId] as any).entries.push(...comments);
         }
 
         for (const hard of assessment.hardSkills) {
           const questionId = hard.questionId.toString();
+          const questionText = hard.section.text;
 
-          if (!hardSkills[questionId]) hardSkills[questionId] = [];
+          hardSkills[questionId] ??= [];
+
           hardSkills[questionId].push({
             user: author,
             mark: hard.mark.text,
+            _questionText: questionText,
           });
         }
       }

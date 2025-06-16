@@ -11,20 +11,31 @@ import {
 import { useApi } from '@backstage/core-plugin-api';
 import { fetchApiRef, identityApiRef } from '@backstage/core-plugin-api';
 
-type SoftSkillCommentStat = {
+type SoftSkillCommentEntry = {
   user: string;
   comment: string;
   mark: string;
 };
 
-type HardSkillMarkStat = {
-  user: string;
-  mark: string;
-};
-
 type AssessmentStat = {
-  softSkills: Record<string, Record<string, SoftSkillCommentStat[]>>;
-  hardSkills: Record<string, HardSkillMarkStat[]>;
+  softSkills: Record<
+    string,
+    {
+      _areaName: string;
+      [competencyId: string]: {
+        _competencyName: string;
+        entries: SoftSkillCommentEntry[];
+      } | string;
+    }
+  >;
+  hardSkills: Record<
+    string,
+    {
+      user: string;
+      mark: string;
+      _questionText?: string;
+    }[]
+  >;
 };
 
 export const AdminUserAssessmentStatComponent = ({
@@ -91,36 +102,55 @@ export const AdminUserAssessmentStatComponent = ({
 
         <Typography variant="h5">Soft Skill Comments</Typography>
         <Divider sx={{ my: 2 }} />
-        {Object.entries(data.softSkills).map(([areaId, competencies]) => (
-          <Paper key={areaId} variant="outlined" sx={{ p: 2, mb: 2 }}>
-            <Typography variant="h6">Area {areaId}</Typography>
-            {Object.entries(competencies).map(([competencyId, comments]) => (
-              <div key={competencyId} style={{ marginBottom: 12 }}>
-                <Typography variant="subtitle1">Competency {competencyId}</Typography>
-                {comments.map((c, idx) => (
-                  <Typography key={idx} variant="body2">
-                    • {c.user}: "{c.comment}" (Mark: {c.mark})
-                  </Typography>
-                ))}
-              </div>
-            ))}
-          </Paper>
-        ))}
+
+        {Object.entries(data.softSkills).map(([areaId, competencies]) => {
+          const areaName = competencies._areaName || areaId;
+          return (
+            <Paper key={areaId} variant="outlined" sx={{ p: 2, mb: 2 }}>
+              <Typography variant="h6">Area: {areaName}</Typography>
+
+              {Object.entries(competencies)
+                .filter(([key]) => key !== '_areaName')
+                .map(([competencyId, block]) => {
+                  const comp = block as {
+                    _competencyName: string;
+                    entries: SoftSkillCommentEntry[];
+                  };
+                  return (
+                    <div key={competencyId} style={{ marginBottom: 12 }}>
+                      <Typography variant="subtitle1">
+                        Competency: {comp._competencyName}
+                      </Typography>
+                      {comp.entries.map((entry, idx) => (
+                        <Typography key={idx} variant="body2">
+                          • {entry.user}: "{entry.comment}" (Mark: {entry.mark})
+                        </Typography>
+                      ))}
+                    </div>
+                  );
+                })}
+            </Paper>
+          );
+        })}
 
         <Typography variant="h5" sx={{ mt: 4 }}>
           Hard Skill Marks
         </Typography>
         <Divider sx={{ my: 2 }} />
-        {Object.entries(data.hardSkills).map(([questionId, marks]) => (
-          <Paper key={questionId} variant="outlined" sx={{ p: 2, mb: 2 }}>
-            <Typography variant="h6">Question {questionId}</Typography>
-            {marks.map((m, idx) => (
-              <Typography key={idx} variant="body2">
-                • {m.user}: Mark {m.mark}
-              </Typography>
-            ))}
-          </Paper>
-        ))}
+
+        {Object.entries(data.hardSkills).map(([questionId, marks]) => {
+          const questionText = marks[0]?._questionText || questionId;
+          return (
+            <Paper key={questionId} variant="outlined" sx={{ p: 2, mb: 2 }}>
+              <Typography variant="h6">Question: {questionText}</Typography>
+              {marks.map((mark, idx) => (
+                <Typography key={idx} variant="body2">
+                  • {mark.user}: Mark {mark.mark}
+                </Typography>
+              ))}
+            </Paper>
+          );
+        })}
       </CardContent>
     </Card>
   );
