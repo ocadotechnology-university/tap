@@ -10,7 +10,7 @@ import {
   TableRow,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { getAllAssessmentsAdmin } from '../../hooks/getAllAssessmentsAdmin';
+import { getAllAssessmentsAdmin } from '../../../hooks/getAllAssessmentsAdmin';
 import { formatAssessments } from './formatAssessments';
 
 const useStyles = makeStyles(theme => ({

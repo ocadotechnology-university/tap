@@ -6,7 +6,7 @@ import {
   TeamAssessmentListService,
   HardSkill,
 } from './types';
-
+import { Entity } from '@backstage/catalog-model';
 export async function createAssessmentListService({
   auth,
   logger,
@@ -166,6 +166,25 @@ export async function createAssessmentListService({
         },
       });
 
+      // === 1. Зібрати унікальних авторів
+      const uniqueUsers = Array.from(new Set(assessments.map(a => a.createdBy)));
+
+      // === 2. Отримати displayName для кожного автора через catalog.getEntityByRef
+      const userNameMap: Record<string, string> = {};
+
+      for (const userRef of uniqueUsers) {
+        const entity = await catalog.getEntityByRef(userRef).catch(() => undefined);
+        if (!entity) continue;
+
+        const profile = entity.spec?.profile as { displayName?: string } | undefined;
+        const displayName = profile?.displayName || entity.metadata?.name;
+
+        if (displayName) {
+          userNameMap[userRef] = displayName;
+        }
+      }
+
+      // === 3. Підготовка структур
       const softSkills: Record<
         string,
         {
@@ -182,8 +201,10 @@ export async function createAssessmentListService({
         { user: string; mark: string; _questionText?: string }[]
       > = {};
 
+      // === 4. Обробка кожної оцінки
       for (const assessment of assessments) {
-        const author = assessment.createdBy;
+        const authorId = assessment.createdBy;
+        const author = userNameMap[authorId] || authorId.split('/').pop() || authorId;
 
         for (const soft of assessment.softSkills) {
           const areaId = soft.areaId.toString();
@@ -227,6 +248,7 @@ export async function createAssessmentListService({
 
       return { softSkills, hardSkills };
     },
+
 
     async getAssessments(options, teamId) {
       const user = options.credentials.principal.userEntityRef;

@@ -10,7 +10,7 @@ import { EditAssessmentComponent } from '../EditAssessmentComponent/EditAssessme
 import { ReviewAssessmentComponent } from '../ReviewAssessmentComponent/ReviewAssessmentComponent';
 import { Skill } from '../EditingAssessmentComponent/EditingAssessmentComponent';
 import { MainMenuComponent } from '../MainMenuComponent/MainMenuComponent';
-import { AdminMainMenuComponent } from '../AdminMainMenuComponent/AdminMainMenuComponent';
+import { AdminMainMenuComponent } from '../AdminComponents/AdminMainMenuComponent/AdminMainMenuComponent';
 
 const useStyles = makeStyles({
   content: {
@@ -65,7 +65,7 @@ export const MainPageComponent = () => {
 
   return (
     <Page themeId="tool">
-      <Content className={classes.content}>
+      <Content className={classes.content} >
         {mode === 'edit' && activeId != null && configData ? (
           <EditAssessmentComponent
             assessmentId={activeId}

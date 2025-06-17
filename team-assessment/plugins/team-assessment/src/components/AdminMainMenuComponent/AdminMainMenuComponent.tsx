@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Typography, Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { AdminAssessmentTable } from '../AdminAssessmentTable/AdminAssessmentTable';
-import { AdminUserListComponent } from '../AdminUserListComponent';
+import { AdminAssessmentTable } from '../AdminComponents/AdminAssessmentTable/AdminAssessmentTable';
+import { AdminUserListComponent } from '../AdminComponents/AdminUserListComponent/AdminUserListComponent';
+import { AdminUserAssessmentStatComponent } from '../AdminComponents/AdminUserAssessmentStatComponent/AdminUserAssessmentStatComponent';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -26,18 +27,29 @@ const useStyles = makeStyles(theme => ({
 
 export const AdminMainMenuComponent: React.FC = () => {
   const classes = useStyles();
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+  if (selectedUserId) {
+    return (
+      <AdminUserAssessmentStatComponent
+        userId={selectedUserId}
+        onBack={() => setSelectedUserId(null)}
+      />
+    );
+  }
 
   return (
-    <Box className={classes.container}>
+    <>
       <Typography variant="h1" className={classes.title}>
         Admin Menu
       </Typography>
       <Typography className={classes.description}>
         View all assessments created by team members across the organization.
       </Typography>
-      <AdminUserListComponent />
+
+      {/* ✅ передаємо onSelectUser */}
+      <AdminUserListComponent onSelectUser={setSelectedUserId} />
       <AdminAssessmentTable />
-      
-    </Box>
+    </>
   );
 };

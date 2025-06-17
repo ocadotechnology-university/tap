@@ -76,6 +76,8 @@ export const CommentCard: React.FC<CommentCardProps> = ({
           top: '4px',
           left: '8px',
           color: '#616161',
+          wordBreak: 'break-word',
+          whiteSpace: 'pre-wrap', 
         }}
       >
         Comment
