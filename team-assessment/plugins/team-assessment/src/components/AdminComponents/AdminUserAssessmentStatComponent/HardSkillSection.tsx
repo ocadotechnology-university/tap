@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { SkillPaper } from './styles/SkillPaper';
 import { HardSkillItem } from './styles/HardSkillItem';
 import { UserMarkChip } from './UserMarkChip';
+import { AverageMarkChip } from '../AverageMarkChip/AverageMarkChip';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -82,6 +83,12 @@ export const HardSkillSection: React.FC<Props> = ({ hardSkills, config }) => {
             <Typography variant="subtitle1" className={classes.questionTitle}>
               {questionText}
             </Typography>
+
+            <AverageMarkChip
+              marks={marks.map(m => m.mark)}
+              allLabels={getHardSkillLabels(questionText)}
+              label="Average grade"
+            />
             {marks.map((mark, idx) => (
               <HardSkillItem
                 key={idx}

@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { SkillPaper } from './styles/SkillPaper';
 import { CommentBox } from './styles/CommentBox';
 import { UserMarkChip } from './UserMarkChip';
+import { AverageMarkChip } from '../AverageMarkChip/AverageMarkChip';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -144,6 +145,12 @@ export const SoftSkillSection: React.FC<Props> = ({ softSkills, config }) => {
                     >
                       {comp._competencyName}
                     </Typography>
+
+                    <AverageMarkChip
+                      marks={comp.entries.map(e => e.mark)}
+                      allLabels={getSoftSkillLabels(comp._competencyName)}
+                      label="Average grade"
+                    />
                     <Box className={classes.commentList}>
                       {comp.entries.map((entry, idx) => (
                         <CommentBox key={idx} className={classes.commentBox}>
