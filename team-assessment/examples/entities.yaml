@@ -215,6 +215,90 @@ spec:
 
 ---
 apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: alice
+spec:
+  memberOf: [marketing]
+  profile:
+    displayName: Alice Johnson
+    email: alice@example.com
+    picture: https://example.com/staff/alice.jpeg
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: bob
+spec:
+  memberOf: [marketing]
+  profile:
+    displayName: Bob Smith
+    email: bob@example.com
+    picture: https://example.com/staff/bob.jpeg
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: claire
+spec:
+  memberOf: [marketing]
+  profile:
+    displayName: Claire Adams
+    email: claire@example.com
+    picture: https://example.com/staff/claire.jpeg
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: dave
+spec:
+  memberOf: [marketing]
+  profile:
+    displayName: Dave Brown
+    email: dave@example.com
+    picture: https://example.com/staff/dave.jpeg
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: emma
+spec:
+  memberOf: [marketing]
+  profile:
+    displayName: Emma Wilson
+    email: emma@example.com
+    picture: https://example.com/staff/emma.jpeg
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: sophia
+spec:
+  memberOf: [marketing]
+  profile:
+    displayName: Sophia Lee
+    email: sophia@example.com
+    picture: https://example.com/staff/sophia.jpeg
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: sasha
+spec:
+  memberOf: [marketing]
+  profile:
+    displayName: Sasha Voloshynivskyi
+    email: sasha@example.com
+    picture: https://example.com/staff/sasha.jpeg
+
+---
+apiVersion: backstage.io/v1alpha1
 kind: Group
 metadata:
   name: marketing
@@ -228,4 +312,4 @@ spec:
     email: marketing@example.com
     picture: https://example.com/groups/marketing.jpeg
   children: []
-  members: [guest, frank, grace, henry]
+  members: [guest, frank, grace, henry, alice, bob, claire, dave, emma, sophia]

@@ -21,7 +21,8 @@ const useStyles = makeStyles(theme => ({
     marginBottom: theme.spacing(2),
   },
   competencyTitle: {
-    fontWeight: 500,
+    fontSize: '1.2rem',
+    fontWeight: 600,
     marginBottom: theme.spacing(1),
   },
   commentList: {
