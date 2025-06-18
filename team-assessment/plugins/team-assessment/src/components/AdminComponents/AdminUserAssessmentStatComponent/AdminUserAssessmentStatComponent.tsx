@@ -11,6 +11,7 @@ import { fetchApiRef, identityApiRef } from '@backstage/core-plugin-api';
 import { useAssessmentConfig } from '../../../hooks/useAssessmentConfig';
 import { SoftSkillSection } from './SoftSkillSection';
 import { HardSkillSection } from './HardSkillSection';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -34,10 +35,10 @@ const useStyles = makeStyles(theme => ({
     zIndex: 2000,
     boxShadow: theme.shadows[6],
     color: theme.palette.common.white,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#616161', // сірий
     '&:hover': {
       transform: 'scale(1.1)',
-      backgroundColor: '#388E3C',
+      backgroundColor: '#424242', // темніший сірий
       boxShadow: theme.shadows[8],
     },
     transition: 'all 0.3s ease',
@@ -120,11 +121,9 @@ export const AdminUserAssessmentStatComponent: React.FC<Props> = ({
     <Box className={classes.container}>
       <Button
         onClick={onBack}
-        variant="outlined"
-        color="secondary"
         className={classes.backButton}
       >
-        Back
+        <ExitToAppIcon />
       </Button>
 
       <Typography variant="h2" className={classes.title}>
