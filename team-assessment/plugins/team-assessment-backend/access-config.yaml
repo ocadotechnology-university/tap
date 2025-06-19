@@ -7,4 +7,3 @@ permissions:
     adminUsers:
       - user:default/jenny
       - user:default/alice
-      - user:development/guest

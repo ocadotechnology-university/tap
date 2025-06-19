@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { SkillPaper } from './styles/SkillPaper';
 import { CommentBox } from './styles/CommentBox';
 import { UserMarkChip } from './UserMarkChip';
-import { AverageMarkChip } from '../AverageMarkChip/AverageMarkChip';
+import { AverageMarkChip } from './AverageMarkChip';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -68,6 +68,13 @@ const useStyles = makeStyles(theme => ({
     top: '50%',
     right: theme.spacing(3),
     transform: 'translateY(-50%)',
+  },
+  emptyState: {
+    color: theme.palette.text.disabled,
+    fontStyle: 'italic',
+    marginLeft: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    fontSize: '1.05rem',
   },
 }));
 
@@ -137,6 +144,8 @@ export const SoftSkillSection: React.FC<Props> = ({ softSkills, config }) => {
                   entries: SoftSkillCommentEntry[];
                 };
 
+                const hasEntries = comp.entries && comp.entries.length > 0;
+
                 return (
                   <Box key={competencyId} sx={{ mb: 2 }}>
                     <Typography
@@ -146,31 +155,39 @@ export const SoftSkillSection: React.FC<Props> = ({ softSkills, config }) => {
                       {comp._competencyName}
                     </Typography>
 
-                    <AverageMarkChip
-                      marks={comp.entries.map(e => e.mark)}
-                      allLabels={getSoftSkillLabels(comp._competencyName)}
-                      label="Average grade"
-                    />
-                    <Box className={classes.commentList}>
-                      {comp.entries.map((entry, idx) => (
-                        <CommentBox key={idx} className={classes.commentBox}>
-                          <Box className={classes.userCommentWrapper}>
-                            <Typography className={classes.username}>
-                              {entry.user}:
-                            </Typography>
-                            <Typography className={classes.commentText}>
-                              "{entry.comment}"
-                            </Typography>
-                          </Box>
-                          <div className={classes.chipWrapper}>
-                            <UserMarkChip
-                              mark={entry.mark}
-                              allMarks={getSoftSkillLabels(comp._competencyName)}
-                            />
-                          </div>
-                        </CommentBox>
-                      ))}
-                    </Box>
+                    {!hasEntries ? (
+                      <Typography className={classes.emptyState}>
+                        No Data
+                      </Typography>
+                    ) : (
+                      <>
+                        <AverageMarkChip
+                          marks={comp.entries.map(e => e.mark)}
+                          allLabels={getSoftSkillLabels(comp._competencyName)}
+                          label="Average grade"
+                        />
+                        <Box className={classes.commentList}>
+                          {comp.entries.map((entry, idx) => (
+                            <CommentBox key={idx} className={classes.commentBox}>
+                              <Box className={classes.userCommentWrapper}>
+                                <Typography className={classes.username}>
+                                  {entry.user}:
+                                </Typography>
+                                <Typography className={classes.commentText}>
+                                  "{entry.comment}"
+                                </Typography>
+                              </Box>
+                              <div className={classes.chipWrapper}>
+                                <UserMarkChip
+                                  mark={entry.mark}
+                                  allMarks={getSoftSkillLabels(comp._competencyName)}
+                                />
+                              </div>
+                            </CommentBox>
+                          ))}
+                        </Box>
+                      </>
+                    )}
                   </Box>
                 );
               })}

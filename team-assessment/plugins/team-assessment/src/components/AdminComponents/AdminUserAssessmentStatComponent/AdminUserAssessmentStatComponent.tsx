@@ -11,7 +11,15 @@ import { fetchApiRef, identityApiRef } from '@backstage/core-plugin-api';
 import { useAssessmentConfig } from '../../../hooks/useAssessmentConfig';
 import { SoftSkillSection } from './SoftSkillSection';
 import { HardSkillSection } from './HardSkillSection';
+import { SoftSkillProgressBar } from './SoftSkillProgressBar';
+import { HardSkillProgressBar } from './HardSkillProgressBar';
+import {
+  calculateSoftSkillsPercentage,
+  calculateHardSkillsPercentage
+} from '../../../utils/ratingUtils';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import { NoDataBox } from './styles/NoDataBox';
+
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -117,21 +125,46 @@ export const AdminUserAssessmentStatComponent: React.FC<Props> = ({
   if (error) return <Typography color="error">Failed to load: {error}</Typography>;
   if (!data) return <Typography>No data available.</Typography>;
 
+  const softPercent = calculateSoftSkillsPercentage(data.softSkills, assessmentConfig);
+  const hardPercent = calculateHardSkillsPercentage(data.hardSkills, assessmentConfig);
+
+
   return (
     <Box className={classes.container}>
-      <Button
-        onClick={onBack}
-        className={classes.backButton}
-      >
+      <Button onClick={onBack} className={classes.backButton}>
         <ExitToAppIcon />
       </Button>
-
       <Typography variant="h2" className={classes.title}>
         {userLabel} Assessment Summary
       </Typography>
+      {/* SOFT SKILLS */}
+      {data.softSkills && Object.keys(data.softSkills).length > 0 ? (
+        <>
+          <SoftSkillProgressBar percent={softPercent} />
+          <SoftSkillSection softSkills={data.softSkills} config={assessmentConfig} />
+        </>
+      ) : (
+        <>
+          <SoftSkillSection softSkills={{}} config={assessmentConfig} />
+          <NoDataBox text="No soft skill data for this user" />
+        </>
+      )}
 
-      <SoftSkillSection softSkills={data.softSkills} config={assessmentConfig} />
-      <HardSkillSection hardSkills={data.hardSkills} config={assessmentConfig} />
+      {/* HARD SKILLS */}
+      {data.hardSkills && Object.keys(data.hardSkills).length > 0 ? (
+        <>
+          <HardSkillProgressBar percent={hardPercent} />
+          <HardSkillSection hardSkills={data.hardSkills} config={assessmentConfig} />
+        </>
+      ) : (
+        <>
+          <HardSkillSection hardSkills={{}} config={assessmentConfig} />
+          <NoDataBox text="No hard skill data for this user" />
+        </>
+      )}
+
     </Box>
   );
+
+
 };

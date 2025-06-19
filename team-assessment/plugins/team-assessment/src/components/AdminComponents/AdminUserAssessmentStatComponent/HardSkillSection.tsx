@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { SkillPaper } from './styles/SkillPaper';
 import { HardSkillItem } from './styles/HardSkillItem';
 import { UserMarkChip } from './UserMarkChip';
-import { AverageMarkChip } from '../AverageMarkChip/AverageMarkChip';
+import { AverageMarkChip } from './AverageMarkChip';
 
 const useStyles = makeStyles(theme => ({
   container: {

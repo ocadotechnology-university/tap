@@ -18,7 +18,7 @@ const useStyles = makeStyles(theme => ({
   },
   description: {
     color: theme.palette.text.secondary,
-    fontSize: '0.95rem',
+    fontSize: '1.1rem',
     lineHeight: 1.6,
     maxWidth: 800,
     marginBottom: theme.spacing(3),
