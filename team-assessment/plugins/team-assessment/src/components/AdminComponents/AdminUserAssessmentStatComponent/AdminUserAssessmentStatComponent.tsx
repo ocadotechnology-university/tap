@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, KeyboardEvent } from 'react';
 import {
   Typography,
   CircularProgress,
   Button,
   Box,
-} from '@mui/material';
+  TextField,
+  Snackbar,
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { useApi } from '@backstage/core-plugin-api';
 import { fetchApiRef, identityApiRef } from '@backstage/core-plugin-api';
@@ -15,11 +17,10 @@ import { SoftSkillProgressBar } from './SoftSkillProgressBar';
 import { HardSkillProgressBar } from './HardSkillProgressBar';
 import {
   calculateSoftSkillsPercentage,
-  calculateHardSkillsPercentage
+  calculateHardSkillsPercentage,
 } from '../../../utils/ratingUtils';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import { NoDataBox } from './styles/NoDataBox';
-
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -28,14 +29,11 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(2),
     width: '100%',
     height: '100%',
-    overflow: 'visible',
   },
   backButton: {
     position: 'fixed',
     right: theme.spacing(4),
     bottom: theme.spacing(4),
-    minWidth: 60,
-    minHeight: 60,
     width: 80,
     height: 80,
     borderRadius: '50%',
@@ -43,10 +41,10 @@ const useStyles = makeStyles(theme => ({
     zIndex: 2000,
     boxShadow: theme.shadows[6],
     color: theme.palette.common.white,
-    backgroundColor: '#616161', // сірий
+    backgroundColor: '#616161',
     '&:hover': {
       transform: 'scale(1.1)',
-      backgroundColor: '#424242', // темніший сірий
+      backgroundColor: '#424242',
       boxShadow: theme.shadows[8],
     },
     transition: 'all 0.3s ease',
@@ -54,9 +52,18 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  title: {
-    fontWeight: 600,
+  title: { fontWeight: 600, marginBottom: theme.spacing(2) },
+  cardLikeBox: {
     marginBottom: theme.spacing(2),
+    padding: theme.spacing(2),
+    backgroundColor: '#2d2d2d',
+    border: '1px solid rgba(255,255,255,0.12)',
+    borderLeft: `2px solid ${theme.palette.primary.main}`,
+    borderRadius: theme.shape.borderRadius,
+  },
+  textField: {
+    width: '100%',
+    '& .MuiInputBase-root': { backgroundColor: '#424242', color: theme.palette.common.white },
   },
 }));
 
@@ -74,71 +81,150 @@ export const AdminUserAssessmentStatComponent: React.FC<Props> = ({
   onBack,
 }) => {
   const classes = useStyles();
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const fetchApi = useApi(fetchApiRef);
   const identityApi = useApi(identityApiRef);
   const { config: assessmentConfig } = useAssessmentConfig();
 
-  // Get the best available label
+  const [data, setData] = useState<any>(null);
+  const [assessmentId, setAssessmentId] = useState<number | null>(null);
+
+  const [finalSoftDecision, setFinalSoftDecision] = useState('');
+  const [finalHardDecision, setFinalHardDecision] = useState('');
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [snack, setSnack] = useState<{ open: boolean; msg: string; ok: boolean }>({
+    open: false,
+    msg: '',
+    ok: true,
+  });
+
   const userLabel = displayName || name || userId.split(/[:/]/).pop();
 
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
       setLoading(true);
-      setError(null);
-
       try {
         const { token } = await identityApi.getCredentials();
-        const res = await fetchApi.fetch(
-          `http://localhost:7007/api/team-assessment/user-assessment-stat?userId=${userId}`,
-          {
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-            credentials: 'include',
-          },
-        );
+        const opts: RequestInit = {
+          headers: { Authorization: `Bearer ${token}` },
+          credentials: 'include' as RequestCredentials,
+        };
 
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        const [listJson, statJson] = await Promise.all([
+          fetchApi
+            .fetch(
+              `http://localhost:7007/api/team-assessment/user-assessments?userId=${userId}`,
+              opts,
+            )
+            .then(r => r.json()),
+          fetchApi
+            .fetch(
+              `http://localhost:7007/api/team-assessment/user-assessment-stat?userId=${userId}`,
+              opts,
+            )
+            .then(r => r.json()),
+        ]);
+
+        setData(statJson);
+
+        if (listJson.length) {
+          const latest = listJson.sort(
+            (a: any, b: any) => +new Date(b.date) - +new Date(a.date),
+          )[0];
+          setAssessmentId(latest.id);
+
+          /* soft + hard параллельно */
+          const [softRes, hardRes] = await Promise.all([
+            fetchApi.fetch(
+              `http://localhost:7007/api/team-assessment/leader-soft-decision/${latest.id}`,
+              opts,
+            ),
+            fetchApi.fetch(
+              `http://localhost:7007/api/team-assessment/leader-hard-decision/${latest.id}`,
+              opts,
+            ),
+          ]);
+
+          if (softRes.ok) {
+            const s = await softRes.json();
+            setFinalSoftDecision(s.finalSoftDecision ?? '');
+          }
+          if (hardRes.ok) {
+            const h = await hardRes.json();
+            setFinalHardDecision(h.finalHardDecision ?? '');
+          }
         }
-
-        const json = await res.json();
-        setData(json);
-      } catch (err: any) {
-        setError(err.message || 'Unknown error');
-        setData(null);
+        setError(null);
+      } catch (e: any) {
+        setError(e.message ?? 'Unknown error');
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchData();
+    })();
   }, [userId, fetchApi, identityApi]);
 
+  /* === helpers === */
+  const showSnack = (msg: string, ok = true) => setSnack({ open: true, msg, ok });
+
+  const saveDecision = async (kind: 'soft' | 'hard') => {
+    if (!assessmentId) return showSnack('No assessment to save', false);
+    try {
+      const { token } = await identityApi.getCredentials();
+      const opts: RequestInit = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: 'include' as RequestCredentials,
+        method: 'PUT',
+        body: JSON.stringify(
+          kind === 'soft'
+            ? { finalSoftDecision }
+            : { finalHardDecision },
+        ),
+      };
+
+      const url =
+        kind === 'soft'
+          ? `http://localhost:7007/api/team-assessment/leader-soft-decision/${assessmentId}`
+          : `http://localhost:7007/api/team-assessment/leader-hard-decision/${assessmentId}`;
+
+      await fetchApi.fetch(url, opts);
+      showSnack('Saved ✔︎', true);
+    } catch (e: any) {
+      showSnack(e.message || 'Error', false);
+    }
+  };
+
+  const keyHandler =
+    (kind: 'soft' | 'hard') => (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        saveDecision(kind);
+      }
+    };
+
+  /* === render === */
   if (loading || !assessmentConfig) return <CircularProgress />;
-  if (error) return <Typography color="error">Failed to load: {error}</Typography>;
+  if (error) return <Typography color="error">{error}</Typography>;
   if (!data) return <Typography>No data available.</Typography>;
 
   const softPercent = calculateSoftSkillsPercentage(data.softSkills, assessmentConfig);
   const hardPercent = calculateHardSkillsPercentage(data.hardSkills, assessmentConfig);
-
 
   return (
     <Box className={classes.container}>
       <Button onClick={onBack} className={classes.backButton}>
         <ExitToAppIcon />
       </Button>
+
       <Typography variant="h2" className={classes.title}>
         {userLabel} Assessment Summary
       </Typography>
-      {/* SOFT SKILLS */}
-      {data.softSkills && Object.keys(data.softSkills).length > 0 ? (
+
+      {/* SOFT */}
+      {Object.keys(data.softSkills).length ? (
         <>
           <SoftSkillProgressBar percent={softPercent} />
           <SoftSkillSection softSkills={data.softSkills} config={assessmentConfig} />
@@ -150,8 +236,25 @@ export const AdminUserAssessmentStatComponent: React.FC<Props> = ({
         </>
       )}
 
-      {/* HARD SKILLS */}
-      {data.hardSkills && Object.keys(data.hardSkills).length > 0 ? (
+      <Box className={classes.cardLikeBox}>
+        <Typography variant="subtitle1" color="primary" gutterBottom>
+          Final Soft Skill Decision
+        </Typography>
+        <TextField
+          multiline
+          minRows={3}
+          variant="outlined"
+          placeholder="Type leader decision for soft skills…"
+          value={finalSoftDecision}
+          onChange={e => setFinalSoftDecision(e.target.value)}
+          onKeyDown={keyHandler('soft')}
+          className={classes.textField}
+          disabled={!assessmentId}
+        />
+      </Box>
+
+      {/* HARD */}
+      {Object.keys(data.hardSkills).length ? (
         <>
           <HardSkillProgressBar percent={hardPercent} />
           <HardSkillSection hardSkills={data.hardSkills} config={assessmentConfig} />
@@ -163,8 +266,30 @@ export const AdminUserAssessmentStatComponent: React.FC<Props> = ({
         </>
       )}
 
+      <Box className={classes.cardLikeBox}>
+        <Typography variant="subtitle1" color="primary" gutterBottom>
+          Final Hard Skill Decision
+        </Typography>
+        <TextField
+          multiline
+          minRows={3}
+          variant="outlined"
+          placeholder="Type leader decision for hard skills…"
+          value={finalHardDecision}
+          onChange={e => setFinalHardDecision(e.target.value)}
+          onKeyDown={keyHandler('hard')}
+          className={classes.textField}
+          disabled={!assessmentId}
+        />
+      </Box>
+
+      <Snackbar
+        open={snack.open}
+        autoHideDuration={2500}
+        onClose={() => setSnack({ ...snack, open: false })}
+        message={snack.msg}
+        ContentProps={{ style: { background: snack.ok ? '#2e7d32' : '#c62828' } }}
+      />
     </Box>
   );
-
-
 };

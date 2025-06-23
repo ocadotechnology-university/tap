@@ -15,8 +15,9 @@ model Assessment {
   date       DateTime @default(now()) @map("Date")
   groupId    String   @map("GroupID")
 
-  hardSkills HardSkill[]
-  softSkills SoftSkillsTable[]
+  hardSkills       HardSkill[]
+  softSkills       SoftSkillsTable[]
+  leaderAssessment LeaderAssessment?
 
   @@map("Assessments")
 }
@@ -90,7 +91,6 @@ model SoftSkillsTable {
   key          Int @unique @default(dbgenerated()) @map("KEY")
 
   assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
-
   area       Area       @relation(fields: [areaId], references: [id])
   competency Competency @relation(fields: [areaId, competencyId], references: [areaId, competencyId])
   comments   Comment[]
@@ -109,4 +109,17 @@ model Comment {
   mark      SoftSkillsMark  @relation(fields: [markId], references: [id])
 
   @@map("Comments")
+}
+
+/// Финальное решение тим-лида: произвольный текст
+model LeaderAssessment {
+  assessmentId Int        @id @map("Assessment_ID")
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  finalSoftDecision String? @map("Final_Soft_Decision") @db.Text
+  finalHardDecision String? @map("Final_Hard_Decision") @db.Text
+
+  reviewedAt DateTime @default(now()) @map("Reviewed_At")
+
+  @@map("LeaderAssessments")
 }

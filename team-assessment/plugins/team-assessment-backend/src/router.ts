@@ -234,5 +234,77 @@ export async function createRouter({
 
     res.status(200).json(data);
   });
+
+  /* -------- SOFT -------- */
+  router.get('/leader-soft-decision/:assessmentId', async (req, res) => {
+    const assessmentId = Number(req.params.assessmentId);
+    if (!assessmentId)
+      return res.status(400).json({ error: 'assessmentId' });
+
+    const row = await prisma.leaderAssessment.findUnique({
+      where: { assessmentId },
+      select: { assessmentId: true, finalSoftDecision: true, reviewedAt: true },
+    });
+    if (!row) return res.status(404).json({ error: 'not found' });
+    res.status(200).json(row);
+  });
+
+  router.put('/leader-soft-decision/:assessmentId', async (req, res) => {
+    const assessmentId = Number(req.params.assessmentId);
+    if (!assessmentId)
+      return res.status(400).json({ error: 'assessmentId' });
+
+    const { finalSoftDecision } = req.body ?? {};
+    if (typeof finalSoftDecision !== 'string')
+      return res.status(400).json({ error: 'finalSoftDecision required' });
+
+    const saved = await prisma.leaderAssessment.upsert({
+      where: { assessmentId },
+      update: { finalSoftDecision },
+      create: { assessmentId, finalSoftDecision },
+    });
+
+    res.status(200).json({
+      assessmentId: saved.assessmentId,
+      finalSoftDecision: saved.finalSoftDecision,
+      reviewedAt: saved.reviewedAt,
+    });
+  });
+
+  /* -------- HARD -------- */
+  router.get('/leader-hard-decision/:assessmentId', async (req, res) => {
+    const assessmentId = Number(req.params.assessmentId);
+    if (!assessmentId)
+      return res.status(400).json({ error: 'assessmentId' });
+
+    const row = await prisma.leaderAssessment.findUnique({
+      where: { assessmentId },
+      select: { assessmentId: true, finalHardDecision: true, reviewedAt: true },
+    });
+    if (!row) return res.status(404).json({ error: 'not found' });
+    res.status(200).json(row);
+  });
+
+  router.put('/leader-hard-decision/:assessmentId', async (req, res) => {
+    const assessmentId = Number(req.params.assessmentId);
+    if (!assessmentId)
+      return res.status(400).json({ error: 'assessmentId' });
+
+    const { finalHardDecision } = req.body ?? {};
+    if (typeof finalHardDecision !== 'string')
+      return res.status(400).json({ error: 'finalHardDecision required' });
+
+    const saved = await prisma.leaderAssessment.upsert({
+      where: { assessmentId },
+      update: { finalHardDecision },
+      create: { assessmentId, finalHardDecision },
+    });
+
+    res.status(200).json({
+      assessmentId: saved.assessmentId,
+      finalHardDecision: saved.finalHardDecision,
+      reviewedAt: saved.reviewedAt,
+    });
+  });
   return router;
 }
