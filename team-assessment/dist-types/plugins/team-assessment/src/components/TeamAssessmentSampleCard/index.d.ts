@@ -1,0 +1,1 @@
+export { TeamAssessmentSampleCard } from './TeamAssessmentSapmleCard';

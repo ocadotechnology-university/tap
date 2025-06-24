@@ -1,0 +1,14 @@
+auth:
+  environment: development
+  providers:
+    guest:
+      development:
+        clientId: development
+        signIn:
+          resolver:
+            type: custom
+            resolver: |-
+              async ({ profile }) => {
+                const id = profile.id ?? 'guest';
+                return { id, entityRef: `user:default/${id}` };
+              }
