@@ -1,55 +1,83 @@
-/*
- * Hi!
+/**
+ * Backstage backend entry-point.
  *
- * Note that this is an EXAMPLE Backstage backend. Please check the README.
+ * Здесь мы объявляем (и динамически подключаем) все backend-плагины, 
+ * которые нужны вашему приложению.
  *
- * Happy hacking!
+ * ➡️  Если добавляете/удаляете новый плагин — просто вставьте/уберите
+ *     очередной `backend.add(import('<module>'))`.
+ *
+ * ⚠️  Порядок имеет значение только для тех случаев, когда плагины
+ *     зависят друг от друга (например, auth-модули к `@backstage/plugin-auth-backend`).
  */
 
 import { createBackend } from '@backstage/backend-defaults';
 
+// ────────────────────────────────────────────────────────────────────────────
+// Базовая инфраструктура
+// ────────────────────────────────────────────────────────────────────────────
 const backend = createBackend();
+
+// приложение (frontend assets, health-check и др.)
 backend.add(import('@backstage/plugin-app-backend'));
+
+// обратные прокси-ендпоинты из `app-config.yaml.proxy`
 backend.add(import('@backstage/plugin-proxy-backend'));
+
+// ────────────────────────────────────────────────────────────────────────────
+// Scaffolder
+// ────────────────────────────────────────────────────────────────────────────
 backend.add(import('@backstage/plugin-scaffolder-backend'));
 backend.add(import('@backstage/plugin-scaffolder-backend-module-github'));
-backend.add(import('@backstage/plugin-techdocs-backend'));
-// auth plugin
-backend.add(import('@backstage/plugin-auth-backend'));
-backend.add(import('@backstage/plugin-auth-backend-module-github-provider'));
-// See https://backstage.io/docs/backend-system/building-backends/migrating#the-auth-plugin
-backend.add(import('@backstage/plugin-auth-backend-module-guest-provider'));
-// See https://backstage.io/docs/auth/guest/provider
 
-// catalog plugin
+// ────────────────────────────────────────────────────────────────────────────
+// TechDocs
+// ────────────────────────────────────────────────────────────────────────────
+backend.add(import('@backstage/plugin-techdocs-backend'));
+
+// ────────────────────────────────────────────────────────────────────────────
+// Auth
+// ────────────────────────────────────────────────────────────────────────────
+backend.add(import('@backstage/plugin-auth-backend'));                        // ядро
+backend.add(import('@backstage/plugin-auth-backend-module-github-provider')); // GitHub OAuth
+backend.add(import('@backstage/plugin-auth-backend-module-guest-provider'));  // гостевой вход
+
+// ────────────────────────────────────────────────────────────────────────────
+// Catalog
+// ────────────────────────────────────────────────────────────────────────────
 backend.add(import('@backstage/plugin-catalog-backend'));
 backend.add(
   import('@backstage/plugin-catalog-backend-module-scaffolder-entity-model'),
 );
+backend.add(import('@backstage/plugin-catalog-backend-module-logs'));         // REST-логи ошибок
 
-// See https://backstage.io/docs/features/software-catalog/configuration#subscribing-to-catalog-errors
-backend.add(import('@backstage/plugin-catalog-backend-module-logs'));
-
-// permission plugin
+// ────────────────────────────────────────────────────────────────────────────
+// Permission framework
+// ────────────────────────────────────────────────────────────────────────────
 backend.add(import('@backstage/plugin-permission-backend'));
-// See https://backstage.io/docs/permissions/getting-started for how to create your own permission policy
-// backend.add(
-//   import('@backstage/plugin-permission-backend-module-allow-all-policy'),
-// );
-backend.add(import('././extensions/permissionsPolicyExtension'));
-// search plugin
-backend.add(import('@backstage/plugin-search-backend'));
 
-// search engine
-// See https://backstage.io/docs/features/search/search-engines
-backend.add(import('@backstage/plugin-search-backend-module-pg'));
+// Кастомная политика, читающая группы из TeamConfigs
+backend.add(import('./extensions/permissionsPolicyExtension'));
 
-// search collators
-backend.add(import('@backstage/plugin-search-backend-module-catalog'));
-backend.add(import('@backstage/plugin-search-backend-module-techdocs'));
+// ────────────────────────────────────────────────────────────────────────────
+// Search
+// ────────────────────────────────────────────────────────────────────────────
+backend.add(import('@backstage/plugin-search-backend'));                      // ядро поиска
+backend.add(import('@backstage/plugin-search-backend-module-pg'));            // Postgres движок
+backend.add(import('@backstage/plugin-search-backend-module-catalog'));       // коллатор каталога
+backend.add(import('@backstage/plugin-search-backend-module-techdocs'));      // коллатор TechDocs
 
-// kubernetes
+// ────────────────────────────────────────────────────────────────────────────
+// Kubernetes (опционально, если конфиг есть)
+// ────────────────────────────────────────────────────────────────────────────
 backend.add(import('@backstage/plugin-kubernetes-backend'));
 
+// ────────────────────────────────────────────────────────────────────────────
+// Ваш кастомный плагин “Team Assessment”
+// ────────────────────────────────────────────────────────────────────────────
 backend.add(import('@internal/plugin-team-assessment-backend'));
+
+// ────────────────────────────────────────────────────────────────────────────
+// Старт
+// ────────────────────────────────────────────────────────────────────────────
 backend.start();

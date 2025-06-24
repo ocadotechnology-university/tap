@@ -122,15 +122,27 @@ spec:
     picture: https://example.com/staff/bob.jpeg
 
 ---
+# apiVersion: backstage.io/v1alpha1
+# kind: User
+# metadata:
+#   name: Voloshynivskyi      # ← твій GitHub username!
+# spec:
+#   memberOf: [engineering]
+#   profile:
+#     displayName: Voloshynivskyi Oleksandr
+#     email: svoloshynivskiy@gmail.com
+#     picture: https://example.com/staff/bob.jpeg
+  
+
 apiVersion: backstage.io/v1alpha1
 kind: User
 metadata:
-  name: Voloshynivskyi      # ← твій GitHub username!
+  name: stanislawq   
 spec:
   memberOf: [engineering]
   profile:
-    displayName: Voloshynivskyi Oleksandr
-    email: svoloshynivskiy@gmail.com
+    displayName: Stanislav Kustov
+    email: stas.kustov10@gmail.com
     picture: https://example.com/staff/bob.jpeg
   
 
