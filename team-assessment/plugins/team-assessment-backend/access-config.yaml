@@ -2,7 +2,7 @@ permissions:
   teamAssessment:
     allowedGroups:
       - group:default/infrastructure
-      # - group:default/marketing
+      - group:default/marketing
       - group:default/engineering
     adminUsers:
       - user:default/jenny

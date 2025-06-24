@@ -5,6 +5,7 @@ import { SkillPaper } from './styles/SkillPaper';
 import { CommentBox } from './styles/CommentBox';
 import { UserMarkChip } from './UserMarkChip';
 import { AverageMarkChip } from './AverageMarkChip';
+import PeopleIcon from '@material-ui/icons/People';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -14,7 +15,8 @@ const useStyles = makeStyles(theme => ({
     fontSize: '2rem',
     fontWeight: 500,
     color: theme.palette.text.primary,
-    marginBottom: theme.spacing(2),
+    marginBottom: theme.spacing(5),
+    marginTop: theme.spacing(5),
   },
   paperTitle: {
     fontWeight: 600,
@@ -122,7 +124,9 @@ export const SoftSkillSection: React.FC<Props> = ({ softSkills, config }) => {
 
   return (
     <Box className={classes.container}>
+      <Divider sx={{ mb: 3 }} />
       <Typography variant="h5" className={classes.sectionTitle}>
+        <PeopleIcon style={{ marginRight: 8, verticalAlign: 'middle', fontSize: '2rem' }} />
         Soft Skill Comments
       </Typography>
       <Divider sx={{ mb: 3 }} />

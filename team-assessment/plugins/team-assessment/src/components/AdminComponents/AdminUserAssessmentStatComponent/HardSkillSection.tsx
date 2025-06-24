@@ -5,6 +5,7 @@ import { SkillPaper } from './styles/SkillPaper';
 import { HardSkillItem } from './styles/HardSkillItem';
 import { UserMarkChip } from './UserMarkChip';
 import { AverageMarkChip } from './AverageMarkChip';
+import ComputerIcon from '@material-ui/icons/Computer';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -14,7 +15,8 @@ const useStyles = makeStyles(theme => ({
     fontSize: '2rem',
     fontWeight: 500,
     color: theme.palette.text.primary,
-    marginBottom: theme.spacing(2),
+    marginBottom: theme.spacing(5),
+    marginTop: theme.spacing(5),
   },
   questionTitle: {
     fontSize: '1.2rem',
@@ -70,7 +72,9 @@ export const HardSkillSection: React.FC<Props> = ({ hardSkills, config }) => {
 
   return (
     <Box className={classes.container}>
+      <Divider sx={{ mb: 3 }} />
       <Typography variant="h5" className={classes.sectionTitle}>
+        <ComputerIcon style={{ marginRight: 8, verticalAlign: 'middle', fontSize: '2rem'}} />
         Hard Skill Marks
       </Typography>
       <Divider sx={{ mb: 3 }} />

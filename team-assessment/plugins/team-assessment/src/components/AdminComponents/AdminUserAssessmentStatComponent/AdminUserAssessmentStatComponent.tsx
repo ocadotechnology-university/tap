@@ -21,6 +21,7 @@ import {
 } from '../../../utils/ratingUtils';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import { NoDataBox } from './styles/NoDataBox';
+import { FinalDecisionBox } from './FinalDecisionBox';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -53,18 +54,6 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'center',
   },
   title: { fontWeight: 600, marginBottom: theme.spacing(2) },
-  cardLikeBox: {
-    marginBottom: theme.spacing(2),
-    padding: theme.spacing(2),
-    backgroundColor: '#2d2d2d',
-    border: '1px solid rgba(255,255,255,0.12)',
-    borderLeft: `2px solid ${theme.palette.primary.main}`,
-    borderRadius: theme.shape.borderRadius,
-  },
-  textField: {
-    width: '100%',
-    '& .MuiInputBase-root': { backgroundColor: '#424242', color: theme.palette.common.white },
-  },
 }));
 
 type Props = {
@@ -226,8 +215,8 @@ export const AdminUserAssessmentStatComponent: React.FC<Props> = ({
       {/* SOFT */}
       {Object.keys(data.softSkills).length ? (
         <>
-          <SoftSkillProgressBar percent={softPercent} />
           <SoftSkillSection softSkills={data.softSkills} config={assessmentConfig} />
+          <SoftSkillProgressBar percent={softPercent} />
         </>
       ) : (
         <>
@@ -236,28 +225,19 @@ export const AdminUserAssessmentStatComponent: React.FC<Props> = ({
         </>
       )}
 
-      <Box className={classes.cardLikeBox}>
-        <Typography variant="subtitle1" color="primary" gutterBottom>
-          Final Soft Skill Decision
-        </Typography>
-        <TextField
-          multiline
-          minRows={3}
-          variant="outlined"
-          placeholder="Type leader decision for soft skills…"
-          value={finalSoftDecision}
-          onChange={e => setFinalSoftDecision(e.target.value)}
-          onKeyDown={keyHandler('soft')}
-          className={classes.textField}
-          disabled={!assessmentId}
-        />
-      </Box>
+      <FinalDecisionBox
+        label="Final Soft Skill Decision"
+        value={finalSoftDecision}
+        onChange={setFinalSoftDecision}
+        onSave={() => saveDecision('soft')}
+        disabled={!assessmentId}
+      />
 
       {/* HARD */}
       {Object.keys(data.hardSkills).length ? (
         <>
-          <HardSkillProgressBar percent={hardPercent} />
           <HardSkillSection hardSkills={data.hardSkills} config={assessmentConfig} />
+          <HardSkillProgressBar percent={hardPercent} />
         </>
       ) : (
         <>
@@ -266,22 +246,13 @@ export const AdminUserAssessmentStatComponent: React.FC<Props> = ({
         </>
       )}
 
-      <Box className={classes.cardLikeBox}>
-        <Typography variant="subtitle1" color="primary" gutterBottom>
-          Final Hard Skill Decision
-        </Typography>
-        <TextField
-          multiline
-          minRows={3}
-          variant="outlined"
-          placeholder="Type leader decision for hard skills…"
-          value={finalHardDecision}
-          onChange={e => setFinalHardDecision(e.target.value)}
-          onKeyDown={keyHandler('hard')}
-          className={classes.textField}
-          disabled={!assessmentId}
-        />
-      </Box>
+      <FinalDecisionBox
+        label="Final Hard Skill Decision"
+        value={finalHardDecision}
+        onChange={setFinalHardDecision}
+        onSave={() => saveDecision('hard')}
+        disabled={!assessmentId}
+      />
 
       <Snackbar
         open={snack.open}
